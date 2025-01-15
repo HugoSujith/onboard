@@ -1,7 +1,7 @@
 package com.hugo.onboard.repository;
 
-import org.springframework.boot.autoconfigure.pulsar.PulsarProperties;
+import com.hugo.onboard.model.transactions.Transactions;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TransactionRepository extends JpaRepository<PulsarProperties.Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<Transactions, Long> {
 }
