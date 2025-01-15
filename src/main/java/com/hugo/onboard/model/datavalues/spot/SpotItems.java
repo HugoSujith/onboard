@@ -2,10 +2,12 @@ package com.hugo.onboard.model.datavalues.spot;
 
 import java.util.Date;
 
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
-@Embeddable
+@Entity
 public class SpotItems {
+    @Id
     private Date date;
     private Double ask;
     private Double mid;

@@ -1,9 +1,12 @@
 package com.hugo.onboard.model.datavalues.historic;
 
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
-@Embeddable
+@Entity
 public class HistoricPerformance {
+    @Id
+    private Long id = 1L; // Fixed ID set to 1
     private Double fiveD;
     private Double oneM;
     private Double ytd;
@@ -13,6 +16,7 @@ public class HistoricPerformance {
     private Double max;
 
     public HistoricPerformance(Double fiveD, Double oneM, Double ytd, Double oneY, Double fiveY, Double tenY, Double max) {
+        this.id = 1L; // Ensuring ID is always set to 1
         this.fiveD = fiveD;
         this.oneM = oneM;
         this.ytd = ytd;
@@ -23,9 +27,14 @@ public class HistoricPerformance {
     }
 
     public HistoricPerformance() {
-
+        this.id = 1L; // Default constructor with fixed ID
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    // Removed the setId method to prevent external modification of the ID
     public Double getFiveD() {
         return fiveD;
     }
@@ -40,6 +49,14 @@ public class HistoricPerformance {
 
     public void setOneM(Double oneM) {
         this.oneM = oneM;
+    }
+
+    public Double getYtd() {
+        return ytd;
+    }
+
+    public void setYtd(Double ytd) {
+        this.ytd = ytd;
     }
 
     public Double getOneY() {
@@ -72,13 +89,5 @@ public class HistoricPerformance {
 
     public void setMax(Double max) {
         this.max = max;
-    }
-
-    public Double getYtd() {
-        return ytd;
-    }
-
-    public void setYtd(Double ytd) {
-        this.ytd = ytd;
     }
 }

@@ -1,10 +1,9 @@
 package com.hugo.onboard.repository;
 
-import com.hugo.onboard.model.datavalues.historic.HistoricStructure;
-import com.hugo.onboard.model.datavalues.historic.HistoricStructureId;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.Date;
 
-@Repository
-public interface HistoricRepository extends JpaRepository<HistoricStructure, HistoricStructureId> {
+import com.hugo.onboard.model.datavalues.historic.HistoricItems;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface HistoricRepository extends JpaRepository<HistoricItems, Date> {
 }

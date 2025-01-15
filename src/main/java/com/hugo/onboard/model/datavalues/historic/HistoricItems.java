@@ -1,10 +1,13 @@
 package com.hugo.onboard.model.datavalues.historic;
 
-import jakarta.persistence.Embeddable;
 import java.util.Date;
 
-@Embeddable
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class HistoricItems {
+    @Id
     private Date date;
     private String weightUnit;
     private Double open;

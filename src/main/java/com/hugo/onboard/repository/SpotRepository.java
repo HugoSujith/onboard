@@ -1,10 +1,9 @@
 package com.hugo.onboard.repository;
 
-import com.hugo.onboard.model.datavalues.spot.SpotStructure;
-import com.hugo.onboard.model.datavalues.spot.SpotStructureId;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.Date;
 
-@Repository
-public interface SpotRepository extends JpaRepository<SpotStructure, SpotStructureId> {
+import com.hugo.onboard.model.datavalues.spot.SpotItems;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SpotRepository extends JpaRepository<SpotItems, Date> {
 }
