@@ -1,0 +1,84 @@
+mysql> show tables;
++----------------------+
+| Tables_in_onboard    |
++----------------------+
+| historic_items       |
+| historic_performance |
+| spot_items           |
+| transactions         |
+| transactions_seq     |
+| user                 |
++----------------------+
+6 rows in set (0.00 sec)
+
+mysql> desc historic_items;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| date        | datetime(6)  | NO   | PRI | NULL    |       |
+| ma200       | double       | YES  |     | NULL    |       |
+| ma50        | double       | YES  |     | NULL    |       |
+| close       | double       | YES  |     | NULL    |       |
+| high        | double       | YES  |     | NULL    |       |
+| low         | double       | YES  |     | NULL    |       |
+| open        | double       | YES  |     | NULL    |       |
+| weight_unit | varchar(255) | YES  |     | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+8 rows in set (0.01 sec)
+
+mysql> desc historic_performance;
++-------+--------+------+-----+---------+-------+
+| Field | Type   | Null | Key | Default | Extra |
++-------+--------+------+-----+---------+-------+
+| id    | bigint | NO   | PRI | NULL    |       |
+| fived | double | YES  |     | NULL    |       |
+| fivey | double | YES  |     | NULL    |       |
+| max   | double | YES  |     | NULL    |       |
+| onem  | double | YES  |     | NULL    |       |
+| oney  | double | YES  |     | NULL    |       |
+| teny  | double | YES  |     | NULL    |       |
+| ytd   | double | YES  |     | NULL    |       |
++-------+--------+------+-----+---------+-------+
+8 rows in set (0.01 sec)
+
+mysql> desc spot_items;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| date        | datetime(6)  | NO   | PRI | NULL    |       |
+| ask         | double       | YES  |     | NULL    |       |
+| bid         | double       | YES  |     | NULL    |       |
+| mid         | double       | YES  |     | NULL    |       |
+| performance | double       | YES  |     | NULL    |       |
+| value       | double       | YES  |     | NULL    |       |
+| weight_unit | varchar(255) | YES  |     | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+7 rows in set (0.00 sec)
+
+mysql> desc transactions;
++----------------+--------------+------+-----+---------+-------+
+| Field          | Type         | Null | Key | Default | Extra |
++----------------+--------------+------+-----+---------+-------+
+| id             | bigint       | NO   | PRI | NULL    |       |
+| date_purchased | datetime(6)  | YES  |     | NULL    |       |
+| grams          | double       | YES  |     | NULL    |       |
+| price          | double       | YES  |     | NULL    |       |
+| status         | varchar(255) | YES  |     | NULL    |       |
+| username       | varchar(255) | YES  |     | NULL    |       |
++----------------+--------------+------+-----+---------+-------+
+6 rows in set (0.00 sec)
+
+mysql> desc user;
++------------+--------------+------+-----+---------+-------+
+| Field      | Type         | Null | Key | Default | Extra |
++------------+--------------+------+-----+---------+-------+
+| username   | varchar(255) | NO   | PRI | NULL    |       |
+| balance    | int          | YES  |     | NULL    |       |
+| first_name | varchar(255) | YES  |     | NULL    |       |
+| last_name  | varchar(255) | YES  |     | NULL    |       |
+| password   | varchar(255) | YES  |     | NULL    |       |
++------------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+mysql> 
+
