@@ -2,13 +2,17 @@ package com.hugo.onboard.model.datavalues.historic;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HistoricItems {
     @Id
     private Date date;
+    @JsonProperty("weight_unit")
     private String weightUnit;
     private Double open;
     private Double close;
@@ -19,7 +23,7 @@ public class HistoricItems {
 
     public HistoricItems(Date date, String weightUnit, Double open, Double close, Double high, Double low) {
         this.date = date;
-        this.weightUnit = weightUnit != null ? weightUnit : "g";  // Default to "g" if null
+        this.weightUnit = weightUnit != null ? weightUnit : "g";
         this.open = open;
         this.close = close;
         this.high = high;
@@ -27,7 +31,7 @@ public class HistoricItems {
     }
 
     public HistoricItems(Date date, Double open, Double close, Double high, Double low) {
-        this(date, "g", open, close, high, low); // Default to "g" for weightUnit
+        this(date, "g", open, close, high, low);
     }
 
     public HistoricItems(Date date, String weightUnit, Double open, Double close, Double high, Double low, Double MA50) {
