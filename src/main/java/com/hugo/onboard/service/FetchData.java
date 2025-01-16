@@ -42,7 +42,6 @@ public class FetchData {
             }
             return response;
         } catch (Exception e) {
-            System.out.println("No instance available! " + e.getMessage());
             return null;
         }
     }
@@ -61,7 +60,6 @@ public class FetchData {
             }
             return response;
         } catch (Exception e) {
-            System.out.println("No instance available! " + e.getMessage());
             return null;
         }
     }
