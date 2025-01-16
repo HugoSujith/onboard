@@ -21,15 +21,11 @@ public class FetchData {
         this.historicRepository = historicRepository;
     }
 
-    @Scheduled(fixedRate = 1000)
-    public void updateDataRegularly() {
+    @Scheduled(fixedRate = 10000)
+    public boolean updateDataRegularly() {
         JsonNode histData = storeHistoricData();
         JsonNode spotData = storeSpotData();
-        if (spotData == null && histData == null) {
-            System.out.println("Operation Failed!");
-        } else {
-            System.out.println("Operation successful");
-        }
+        return (histData != null && spotData != null);
     }
 
     public JsonNode storeSpotData() {
