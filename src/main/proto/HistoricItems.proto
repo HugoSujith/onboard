@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+//option java_multiple_files = true;
+option java_package = "com.hugo.onboard.model.datavalues.historic";
+//option java_outer_classname = "HistoricItems";
+
+message HistoricItems {
+  google.protobuf.Timestamp date = 1;
+  string weight_unit = 2;
+  double open = 3;
+  double close = 4;
+  double high = 5;
+  double low = 6;
+  double MA50 = 7;
+  double MA200 = 8;
+}

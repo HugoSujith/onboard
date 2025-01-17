@@ -1,11 +1,6 @@
-package com.hugo.onboard.model.datavalues.historic;
+package com.hugo.onboard.pojomodel.datavalues.historic;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-
-@Entity
 public class HistoricPerformance {
-    @Id
     private Long id = 1L; // Fixed ID set to 1
     private Double fiveD;
     private Double oneM;

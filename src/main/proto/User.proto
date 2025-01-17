@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+//option java_multiple_files = true;
+option java_package = "com.hugo.onboard.model.user";
+//option java_outer_classname = "User";
+
+message User {
+  string username = 1;
+  string password = 2;
+  string firstName = 3;
+  string lastName = 4;
+  int32 balance = 5;
+}

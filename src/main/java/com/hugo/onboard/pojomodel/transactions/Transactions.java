@@ -1,16 +1,8 @@
-package com.hugo.onboard.model.transactions;
+package com.hugo.onboard.pojomodel.transactions;
 
 import java.util.Date;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
 public class Transactions {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String username;
     private Date datePurchased;
@@ -28,6 +20,14 @@ public class Transactions {
         this.grams = grams;
         this.price = price;
         this.status = status;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Double getGrams() {

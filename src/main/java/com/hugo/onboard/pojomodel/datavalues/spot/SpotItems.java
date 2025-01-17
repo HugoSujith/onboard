@@ -1,16 +1,12 @@
-package com.hugo.onboard.model.datavalues.spot;
+package com.hugo.onboard.pojomodel.datavalues.spot;
 
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 
-@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SpotItems {
-    @Id
     private Date date;
     private Double ask;
     private Double mid;

@@ -1,16 +1,12 @@
-package com.hugo.onboard.model.datavalues.historic;
+package com.hugo.onboard.pojomodel.datavalues.historic;
 
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 
-@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HistoricItems {
-    @Id
     private Date date;
     @JsonProperty("weight_unit")
     private String weightUnit;

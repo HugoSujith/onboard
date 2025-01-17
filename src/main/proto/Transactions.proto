@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+//option java_multiple_files = true;
+option java_package = "com.hugo.onboard.model.transactions";
+//option java_outer_classname = "Transactions";
+
+message Transactions {
+  int64 id = 1;
+  string username = 2;
+  google.protobuf.Timestamp datePurchased = 3;
+  double grams = 4;
+  double price = 5;
+  double status = 6;
+}
