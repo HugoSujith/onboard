@@ -1,5 +1,7 @@
 CREATE DATABASE IF NOT EXISTS onboard;
 
+use onboard;
+
 CREATE TABLE IF NOT EXISTS historic_items_gold (
     date DATE PRIMARY KEY,
     weight_unit VARCHAR(50) NOT NULL,

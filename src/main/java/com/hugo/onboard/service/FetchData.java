@@ -80,14 +80,26 @@ public class FetchData {
                             DateTimeFormatter.ISO_OFFSET_DATE_TIME
                     ).toLocalDateTime();
 
-                    String checkQuery = "SELECT COUNT(*) FROM spot_items_" + metal + " WHERE date = :date";
+                    String checkQuery = "";
+
+                    if (metal.equals("gold")) {
+                        checkQuery = "SELECT COUNT(*) FROM spot_items_gold WHERE date = :date";
+                    } else {
+                        checkQuery = "SELECT COUNT(*) FROM spot_items_silver WHERE date = :date";
+                    }
+
                     Map<String, Object> checkParams = new HashMap<>();
                     checkParams.put("date", sqlDate);
 
                     int count = namedParameterJdbcTemplate.queryForObject(checkQuery, checkParams, Integer.class);
 
                     if (count == 0) {
-                        String insertQuery = "INSERT INTO spot_items_" + metal + "(date, ask, mid, bid, value, performance, weight_unit) VALUES (:date, :ask, :mid, :bid, :value, :performance, :weightUnit)";
+                        String insertQuery = "";
+                        if (metal.equals("gold")) {
+                            insertQuery = "INSERT INTO spot_items_gold (date, ask, mid, bid, value, performance, weight_unit) VALUES (:date, :ask, :mid, :bid, :value, :performance, :weightUnit)";
+                        } else {
+                            insertQuery = "INSERT INTO spot_items_silver (date, ask, mid, bid, value, performance, weight_unit) VALUES (:date, :ask, :mid, :bid, :value, :performance, :weightUnit)";
+                        }
                         Map<String, Object> insertParams = new HashMap<>();
                         insertParams.put("date", sqlDate);
                         insertParams.put("ask", spotData.getFieldsMap().get("ask").getNumberValue());
@@ -138,14 +150,26 @@ public class FetchData {
                     LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
                     Date sqlDate = Date.valueOf(date);
 
-                    String checkQuery = "SELECT COUNT(*) FROM historic_items_" + metal + " WHERE date = :date";
+                    String checkQuery = "";
+
+                    if (metal.equals("gold")) {
+                        checkQuery = "SELECT COUNT(*) FROM historic_items_gold WHERE date = :date";
+                    } else {
+                        checkQuery = "SELECT COUNT(*) FROM historic_items_silver WHERE date = :date";
+                    }
+
                     Map<String, Object> checkParams = new HashMap<>();
                     checkParams.put("date", sqlDate);
 
                     int count = namedParameterJdbcTemplate.queryForObject(checkQuery, checkParams, Integer.class);
 
                     if (count == 0) {
-                        String insertQuery = "INSERT INTO historic_items_" + metal + " (date, open, close, high, low, ma50, ma200, weight_unit) VALUES (:date, :open, :close, :high, :low, :ma50, :ma200, :weightUnit)";
+                        String insertQuery = "";
+                        if (metal.equals("silver")) {
+                            insertQuery = "INSERT INTO historic_items_silver (date, open, close, high, low, ma50, ma200, weight_unit) VALUES (:date, :open, :close, :high, :low, :ma50, :ma200, :weightUnit)";
+                        } else {
+                            insertQuery = "INSERT INTO historic_items_gold (date, open, close, high, low, ma50, ma200, weight_unit) VALUES (:date, :open, :close, :high, :low, :ma50, :ma200, :weightUnit)";
+                        }
                         Map<String, Object> insertParams = new HashMap<>();
                         insertParams.put("date", sqlDate);
                         insertParams.put("open", historicData.getFieldsMap().get("open").getNumberValue());
@@ -189,7 +213,15 @@ public class FetchData {
                     Struct.Builder spotDataBuilder = Struct.newBuilder();
                     JsonFormat.parser().ignoringUnknownFields().merge(jsonToStr, spotDataBuilder);
                     Struct spotData = spotDataBuilder.build();
-                    String query = "INSERT INTO spot_items_" + metal + " (date, ask, mid, bid, value, performance, weight_unit) VALUES (:date, :ask, :mid, :bid, :value, :performance, :weightUnit)";
+
+                    String query = "";
+
+                    if (metal.equals("gold")) {
+                        query = "INSERT INTO spot_items_gold (date, ask, mid, bid, value, performance, weight_unit) VALUES (:date, :ask, :mid, :bid, :value, :performance, :weightUnit)";
+                    } else {
+                        query = "INSERT INTO spot_items_silver (date, ask, mid, bid, value, performance, weight_unit) VALUES (:date, :ask, :mid, :bid, :value, :performance, :weightUnit)";
+                    }
+
                     Map<String, Object> params = new HashMap<>();
                     LocalDateTime sqlDate = OffsetDateTime.parse(spotData.getFieldsMap().get("date").getStringValue(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime();
                     params.put("date", sqlDate);
@@ -231,7 +263,15 @@ public class FetchData {
                     Struct.Builder historicDataBuilder = Struct.newBuilder();
                     JsonFormat.parser().ignoringUnknownFields().merge(jsonToStr, historicDataBuilder);
                     Struct historicData = historicDataBuilder.build();
-                    String query = "INSERT INTO historic_items_" + metal + " (date, ma200, ma50, close, open, high, low, weight_unit) VALUES (:date, :ma200, :ma50, :close, :open, :high, :low, :weightUnit)";
+
+                    String query = "";
+
+                    if (metal.equals("gold")) {
+                        query = "INSERT INTO historic_items_gold (date, ma200, ma50, close, open, high, low, weight_unit) VALUES (:date, :ma200, :ma50, :close, :open, :high, :low, :weightUnit)";
+                    } else {
+                        query = "INSERT INTO historic_items_silver (date, ma200, ma50, close, open, high, low, weight_unit) VALUES (:date, :ma200, :ma50, :close, :open, :high, :low, :weightUnit)";
+                    }
+
                     Map<String, Object> params = new HashMap<>();
                     LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
                     Date sqlDate = Date.valueOf(date);
