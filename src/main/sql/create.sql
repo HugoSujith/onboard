@@ -2,46 +2,29 @@ CREATE DATABASE IF NOT EXISTS onboard;
 
 use onboard;
 
-CREATE TABLE IF NOT EXISTS historic_items_gold (
-    date DATE PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS historic_items (
+    date DATE NOT NULL,
+    metal VARCHAR(10) NOT NULL,
     weight_unit VARCHAR(50) NOT NULL,
     open DOUBLE NOT NULL,
     close DOUBLE NOT NULL,
     high DOUBLE NOT NULL,
     low DOUBLE NOT NULL,
     ma50 DOUBLE NULL,
-    ma200 DOUBLE NULL
+    ma200 DOUBLE NULL,
+    PRIMARY KEY (date, metal)
 );
 
-CREATE TABLE IF NOT EXISTS spot_items_gold (
-    date DATETIME PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS spot_items (
+    date DATETIME NOT NULL,
+    metal VARCHAR(10) NOT NULL,
     weight_unit VARCHAR(50) NOT NULL,
     ask DOUBLE NOT NULL,
     mid DOUBLE NOT NULL,
     bid DOUBLE NOT NULL,
     value DOUBLE NOT NULL,
-    performance DOUBLE NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS historic_items_silver (
-    date DATE PRIMARY KEY,
-    weight_unit VARCHAR(50) NOT NULL,
-    open DOUBLE NOT NULL,
-    close DOUBLE NOT NULL,
-    high DOUBLE NOT NULL,
-    low DOUBLE NOT NULL,
-    ma50 DOUBLE NULL,
-    ma200 DOUBLE NULL
-);
-
-CREATE TABLE IF NOT EXISTS spot_items_silver (
-    date DATETIME PRIMARY KEY,
-    weight_unit VARCHAR(50) NOT NULL,
-    ask DOUBLE NOT NULL,
-    mid DOUBLE NOT NULL,
-    bid DOUBLE NOT NULL,
-    value DOUBLE NOT NULL,
-    performance DOUBLE NOT NULL
+    performance DOUBLE NOT NULL,
+    PRIMARY KEY (date, metal)
 );
 
 CREATE TABLE IF NOT EXISTS historic_performance (
@@ -61,6 +44,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     grams DOUBLE NOT NULL,
     price DOUBLE NOT NULL,
     status VARCHAR(256) NOT NULL,
+    metal VARCHAR(10) NOT NULL,
     username VARCHAR(256) NOT NULL
 );
 

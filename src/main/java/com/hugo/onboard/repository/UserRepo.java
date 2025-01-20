@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.hugo.onboard.model.user.UserOuterClass.User;
+import com.hugo.onboard.model.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,38 +36,32 @@ public class UserRepo {
         }
     }
 
-    public User getUserByUsername(User user) {
-        if (findIfUserPresent(user)) {
-            String query = "SELECT * FROM USER WHERE USERNAME = :username";
-            Map<String, Object> params = new HashMap<>();
-            params.put("username", user.getUsername());
+    public User getUserByUsername(String username) {
+        String query = "SELECT * FROM USER WHERE USERNAME = :username";
+        Map<String, Object> params = new HashMap<>();
+        params.put("username", username);
 
-            try {
-                List<User> users = namedParameterJdbcTemplate.query(query, params, new RowMapper<User>() {
-                    @Override
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return User.newBuilder()
-                                .setUsername(rs.getString("username"))
-                                .setPassword(rs.getString("password"))
-                                .setFirstName(rs.getString("firstname"))
-                                .setLastName(rs.getString("lastname"))
-                                .setBalance(rs.getInt("balance"))
-                                .build();
+        try {
+            List<User> users = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> User.newBuilder()
+                    .setUsername(rs.getString("username"))
+                    .setPassword(rs.getString("password"))
+                    .setFirstname(rs.getString("firstname"))
+                    .setLastname(rs.getString("lastname"))
+                    .setBalance(rs.getInt("balance"))
+                    .build());
 
-                    }
-                });
-
-                if (!users.isEmpty()) {
-                    return users.getFirst();
-                }
-            } catch (Exception e) {
-                log.info(e.getMessage());
-                return null;
+            if (!users.isEmpty()) {
+                log.info(users.getFirst().toString());
+                return users.getFirst();
+            } else {
+                log.info("No user found probably!");
             }
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return null;
         }
         return null;
     }
-
 
     public boolean addUsersToDB(User user) {
         if (!findIfUserPresent(user)) {
@@ -75,8 +69,8 @@ public class UserRepo {
             Map<String, Object> params = new HashMap<>();
             params.put("username", user.getUsername());
             params.put("password", user.getPassword());
-            params.put("first_name", user.getFirstName());
-            params.put("last_name", user.getLastName());
+            params.put("first_name", user.getFirstname());
+            params.put("last_name", user.getLastname());
             params.put("balance", user.getBalance());
 
             System.out.println("Map contents: " + params);

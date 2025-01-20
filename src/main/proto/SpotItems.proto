@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-//option java_multiple_files = true;
+option java_multiple_files = true;
 option java_package = "com.hugo.onboard.model.datavalues.spot";
 //option java_outer_classname = "SpotItems";
 
@@ -14,4 +14,5 @@ message SpotItems {
   double value = 5;
   double performance = 6;
   double weightUnit = 7;
+  string metal = 8;
 }
