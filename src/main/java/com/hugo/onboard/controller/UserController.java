@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserRepo userRepo;
-    Logger log = Logger.getLogger(getClass().getName());
 
     public UserController(UserRepo userRepo) {
         this.userRepo = userRepo;
