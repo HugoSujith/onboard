@@ -1,9 +1,9 @@
 syntax = "proto3";
-
+package historicItems;
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
-option java_package = "com.hugo.onboard.model.datavalues.historic";
+option java_package = "com.hugo.metalbroker.model.datavalues.historic";
 //option java_outer_classname = "HistoricItems";
 
 message HistoricItems {

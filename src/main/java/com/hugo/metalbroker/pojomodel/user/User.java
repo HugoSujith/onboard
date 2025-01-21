@@ -1,4 +1,4 @@
-package com.hugo.onboard.pojomodel.user;
+package com.hugo.metalbroker.pojomodel.user;
 
 public class User {
     private String username;

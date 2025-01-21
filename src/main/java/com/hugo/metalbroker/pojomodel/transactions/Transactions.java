@@ -1,4 +1,4 @@
-package com.hugo.onboard.pojomodel.transactions;
+package com.hugo.metalbroker.pojomodel.transactions;
 
 import java.util.Date;
 

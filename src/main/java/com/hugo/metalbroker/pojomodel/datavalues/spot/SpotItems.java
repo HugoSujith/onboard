@@ -1,4 +1,4 @@
-package com.hugo.onboard.pojomodel.datavalues.spot;
+package com.hugo.metalbroker.pojomodel.datavalues.spot;
 
 import java.util.Date;
 

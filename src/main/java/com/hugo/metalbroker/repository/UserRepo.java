@@ -1,16 +1,13 @@
-package com.hugo.onboard.repository;
+package com.hugo.metalbroker.repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.hugo.onboard.model.user.User;
+import com.hugo.metalbroker.model.user.UserDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -23,7 +20,7 @@ public class UserRepo {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public boolean findIfUserPresent(User user) {
+    public boolean findIfUserPresent(UserDTO user) {
         String query = "SELECT COUNT(*) FROM USER WHERE USERNAME = :username";
         Map<String, Object> params = new HashMap<>();
         params.put("username", user.getUsername());
@@ -36,13 +33,13 @@ public class UserRepo {
         }
     }
 
-    public User getUserByUsername(String username) {
+    public UserDTO getUserByUsername(String username) {
         String query = "SELECT * FROM USER WHERE USERNAME = :username";
         Map<String, Object> params = new HashMap<>();
         params.put("username", username);
 
         try {
-            List<User> users = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> User.newBuilder()
+            List<UserDTO> users = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> UserDTO.newBuilder()
                     .setUsername(rs.getString("username"))
                     .setPassword(rs.getString("password"))
                     .setFirstname(rs.getString("firstname"))
@@ -63,7 +60,7 @@ public class UserRepo {
         return null;
     }
 
-    public boolean addUsersToDB(User user) {
+    public boolean addUsersToDB(UserDTO user) {
         if (!findIfUserPresent(user)) {
             String query = "INSERT INTO USER (username, password, firstname, lastname, balance) VALUES (:username, :password, :first_name, :last_name, :balance)";
             Map<String, Object> params = new HashMap<>();
@@ -86,7 +83,7 @@ public class UserRepo {
         return false;
     }
 
-    public ResponseEntity<String> authenticateUser(User user) {
+    public ResponseEntity<String> authenticateUser(UserDTO user) {
         String query = "SELECT COUNT(*) FROM USER WHERE USERNAME = :username AND PASSWORD = :password";
         Map<String, Object> params = new HashMap<>();
         params.put("username", user.getUsername());

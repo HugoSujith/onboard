@@ -1,4 +1,4 @@
-package com.hugo.onboard.pojomodel.datavalues.historic;
+package com.hugo.metalbroker.pojomodel.datavalues.historic;
 
 import java.util.Date;
 

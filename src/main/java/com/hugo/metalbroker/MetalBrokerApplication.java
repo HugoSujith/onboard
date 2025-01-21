@@ -6,10 +6,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class OnboardApplication {
+public class MetalBrokerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OnboardApplication.class, args);
+		SpringApplication.run(MetalBrokerApplication.class, args);
 	}
 
 }

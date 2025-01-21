@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
-option java_package = "com.hugo.onboard.model.datavalues.spot";
+option java_package = "com.hugo.metalbroker.model.datavalues.spot";
 //option java_outer_classname = "SpotItems";
 
 message SpotItems {

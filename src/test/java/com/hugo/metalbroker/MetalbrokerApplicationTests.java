@@ -1,10 +1,10 @@
-package com.hugo.onboard;
+package com.hugo.metalbroker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class OnboardApplicationTests {
+class MetalbrokerApplicationTests {
 
 	@Test
 	void contextLoads() {

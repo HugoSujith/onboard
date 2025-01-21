@@ -1,4 +1,4 @@
-package com.hugo.onboard.service.implementations;
+package com.hugo.metalbroker.service.implementations;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -9,7 +9,8 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
-import com.hugo.onboard.service.FetchHistoricData;
+import com.google.protobuf.util.JsonFormat;
+import com.hugo.metalbroker.service.FetchHistoricData;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -103,6 +104,43 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
             }
         }
         return (value > 0);
+    }
+
+    int insertIntoDB(String metal, Struct historicData, Date sqlDate) {
+        String insertQuery =
+                "INSERT INTO historic_items (metal, date, open, close, high, low, ma50, ma200, weight_unit) VALUES (:metal, :date, :open, :close, :high, :low, :ma50, :ma200, :weightUnit)";
+
+        Map<String, Object> params = buildParamsForData(historicData, sqlDate, metal);
+
+        return namedParameterJdbcTemplate.update(insertQuery, params);
+    }
+
+    Struct parseJsonToProto(JsonNode historicDataJson) throws Exception {
+        String jsonToStr = historicDataJson.toString();
+        Struct.Builder historicDataBuilder = Struct.newBuilder();
+        JsonFormat.parser().ignoringUnknownFields().merge(jsonToStr, historicDataBuilder);
+        return historicDataBuilder.build();
+    }
+
+    Map<String, Object> buildParamsForData(Struct historicData, Date sqlDate, String metal) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", sqlDate);
+        params.put("metal", metal);
+        params.put("ma200", getFieldValue(historicData, "MA200"));
+        params.put("ma50", getFieldValue(historicData, "MA50"));
+        params.put("close", getFieldValue(historicData, "close"));
+        params.put("open", getFieldValue(historicData, "open"));
+        params.put("high", getFieldValue(historicData, "high"));
+        params.put("low", getFieldValue(historicData, "low"));
+        params.put("weightUnit", historicData.getFieldsMap().get("weight_unit").getStringValue());
+        return params;
+    }
+
+    double getFieldValue(Struct historicData, String fieldName) {
+        if (historicData.getFieldsMap().get(fieldName) != null) {
+            return historicData.getFieldsMap().get(fieldName).getNumberValue();
+        }
+        return -1000;
     }
 
 }

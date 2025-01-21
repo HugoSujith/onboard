@@ -1,4 +1,4 @@
-package com.hugo.onboard.pojomodel.datavalues.historic;
+package com.hugo.metalbroker.pojomodel.datavalues.historic;
 
 public class HistoricPerformance {
     private Long id = 1L; // Fixed ID set to 1

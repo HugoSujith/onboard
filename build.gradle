@@ -37,22 +37,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
 
-
-protobuf {
-	protoc {
-		artifact = "com.google.protobuf:protoc:4.29.3"
-	}
-	generateProtoTasks {
-		all().each { task ->
-			task.builtins {
-				java {
-					option 'lite'
-				}
-			}
-		}
-	}
+	implementation "com.google.protobuf:protobuf-java"
+	implementation "com.google.protobuf:protobuf-java-util"
 }
 
 tasks.named('test') {
