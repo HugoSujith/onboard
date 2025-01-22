@@ -17,3 +17,7 @@ message HistoricItems {
   double MA200 = 8;
   string metal = 9;
 }
+
+message HistoricItemsList {
+  repeated HistoricItems items = 1;
+}

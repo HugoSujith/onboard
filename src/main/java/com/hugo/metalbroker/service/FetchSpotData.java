@@ -1,5 +1,8 @@
 package com.hugo.metalbroker.service;
 
+import java.util.List;
+
+import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import org.springframework.scheduling.annotation.Scheduled;
 
 public interface FetchSpotData {
@@ -10,4 +13,5 @@ public interface FetchSpotData {
 
     boolean storeData(String url);
 
+    List<SpotItems> getItems(String metal);
 }

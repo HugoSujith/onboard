@@ -2,14 +2,18 @@ package com.hugo.metalbroker.service.implementations;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.JsonFormat;
+import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.service.FetchHistoricData;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -22,6 +26,7 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private static final Logger LOGGER = Logger.getLogger(FetchHistoricDataImpl.class.getName());
     private int checker = 0;
+    private Logger log = Logger.getLogger("FetchHistoricDataImpl.class");
 
     public FetchHistoricDataImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -106,7 +111,36 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
         return (value > 0);
     }
 
-    int insertIntoDB(String metal, Struct historicData, Date sqlDate) {
+    @Override
+    public List<HistoricItems> getItems(String metal) {
+        log.info("Get Items method is being invoked");
+        String query = "SELECT * FROM HISTORIC_ITEMS WHERE metal=:metal";
+        Map<String, Object> params = new HashMap<>();
+        params.put("metal", metal);
+
+        return namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> HistoricItems.newBuilder()
+                .setDate(sqlDateToGoogleTimestamp(rs.getDate("date")))
+                .setMetal(rs.getString("metal"))
+                .setWeightUnit(rs.getString("weight_unit"))
+                .setHigh(rs.getDouble("high"))
+                .setLow(rs.getDouble("low"))
+                .setOpen(rs.getDouble("open"))
+                .setClose(rs.getDouble("close"))
+                .setMA50(rs.getDouble("MA50"))
+                .setMA200(rs.getDouble("MA200"))
+                .build());
+    }
+
+    public Timestamp sqlDateToGoogleTimestamp(Date date) {
+        LocalDate localDate = date.toLocalDate();
+
+        return Timestamp.newBuilder()
+                .setSeconds(localDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC))
+                .setNanos(0)
+                .build();
+    }
+
+    public int insertIntoDB(String metal, Struct historicData, Date sqlDate) {
         String insertQuery =
                 "INSERT INTO historic_items (metal, date, open, close, high, low, ma50, ma200, weight_unit) VALUES (:metal, :date, :open, :close, :high, :low, :ma50, :ma200, :weightUnit)";
 
@@ -115,14 +149,14 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
         return namedParameterJdbcTemplate.update(insertQuery, params);
     }
 
-    Struct parseJsonToProto(JsonNode historicDataJson) throws Exception {
+    public Struct parseJsonToProto(JsonNode historicDataJson) throws Exception {
         String jsonToStr = historicDataJson.toString();
         Struct.Builder historicDataBuilder = Struct.newBuilder();
         JsonFormat.parser().ignoringUnknownFields().merge(jsonToStr, historicDataBuilder);
         return historicDataBuilder.build();
     }
 
-    Map<String, Object> buildParamsForData(Struct historicData, Date sqlDate, String metal) {
+    public Map<String, Object> buildParamsForData(Struct historicData, Date sqlDate, String metal) {
         Map<String, Object> params = new HashMap<>();
         params.put("date", sqlDate);
         params.put("metal", metal);
@@ -136,7 +170,7 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
         return params;
     }
 
-    double getFieldValue(Struct historicData, String fieldName) {
+    public double getFieldValue(Struct historicData, String fieldName) {
         if (historicData.getFieldsMap().get(fieldName) != null) {
             return historicData.getFieldsMap().get(fieldName).getNumberValue();
         }

@@ -13,6 +13,10 @@ message SpotItems {
   double bid = 4;
   double value = 5;
   double performance = 6;
-  double weightUnit = 7;
+  string weightUnit = 7;
   string metal = 8;
+}
+
+message SpotItemsList {
+  repeated SpotItems items = 1;
 }

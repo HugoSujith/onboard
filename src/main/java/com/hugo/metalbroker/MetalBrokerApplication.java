@@ -1,4 +1,4 @@
-package com.hugo.onboard;
+package com.hugo.metalbroker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

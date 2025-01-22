@@ -19,9 +19,10 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+//	implementation "org.springframework.boot:spring-boot-starter-security"
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
@@ -32,14 +33,8 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	implementation 'org.springframework.boot:spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	implementation "com.google.protobuf:protobuf-java"
-	implementation "com.google.protobuf:protobuf-java-util"
 }
 
 tasks.named('test') {
