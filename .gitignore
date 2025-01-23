@@ -39,6 +39,6 @@ out/
 
 .env
 ./pojomodel/
-./Project Descriptors/
+projectDescriptors/
 ./dump.rdb
 .progress.txt
