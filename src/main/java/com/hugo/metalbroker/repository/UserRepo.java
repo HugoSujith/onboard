@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.hugo.metalbroker.exceptions.AuthenticationFailureException;
+import com.hugo.metalbroker.exceptions.RegistrationFailureException;
+import com.hugo.metalbroker.exceptions.UserNotFoundException;
 import com.hugo.metalbroker.model.user.UserDTO;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -24,12 +25,11 @@ public class UserRepo {
         String query = "SELECT COUNT(*) FROM USER WHERE USERNAME = :username";
         Map<String, Object> params = new HashMap<>();
         params.put("username", user.getUsername());
-
         try {
             Integer count = namedParameterJdbcTemplate.queryForObject(query, params, Integer.class);
             return count != null && count > 0;
         } catch (Exception e) {
-            throw new RuntimeException("Error while checking user presence", e);
+            throw new UserNotFoundException(user.getUsername());
         }
     }
 
@@ -50,13 +50,11 @@ public class UserRepo {
             if (!users.isEmpty()) {
                 return users.getFirst();
             } else {
-                LOGGER.info("No user found probably!");
+                throw new UserNotFoundException(username);
             }
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-            return null;
+            throw new UserNotFoundException(username);
         }
-        return null;
     }
 
     public boolean addUsersToDB(UserDTO user) {
@@ -75,14 +73,13 @@ public class UserRepo {
                 int rowsAffected = namedParameterJdbcTemplate.update(query, params);
                 return rowsAffected > 0;
             } catch (Exception e) {
-                LOGGER.info(e.getMessage());
-                throw new RuntimeException("Error while adding user", e);
+                throw new RegistrationFailureException(user.getUsername());
             }
         }
         return false;
     }
 
-    public ResponseEntity<String> authenticateUser(UserDTO user) {
+    public boolean authenticateUser(UserDTO user) {
         String query = "SELECT COUNT(*) FROM USER WHERE USERNAME = :username AND PASSWORD = :password";
         Map<String, Object> params = new HashMap<>();
         params.put("username", user.getUsername());
@@ -90,14 +87,9 @@ public class UserRepo {
 
         try {
             Integer count = namedParameterJdbcTemplate.queryForObject(query, params, Integer.class);
-            if (count != null && count > 0) {
-                return new ResponseEntity<>("Authentication successful", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
-            }
+            return (count != null && count > 0);
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-            throw new RuntimeException("Error while authenticating user", e);
+            throw new AuthenticationFailureException(user.getUsername());
         }
     }
 }

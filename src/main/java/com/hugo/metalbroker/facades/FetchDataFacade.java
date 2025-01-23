@@ -1,5 +1,6 @@
 package com.hugo.metalbroker.facades;
 
+import com.hugo.metalbroker.exceptions.MetalNotFoundException;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import com.hugo.metalbroker.repository.FetchHistoricData;
@@ -32,7 +33,7 @@ public class FetchDataFacade {
             redisHistoricList.setValue(key, data);
             return data;
         } else {
-            throw new RuntimeException("Metal not found");
+            throw new MetalNotFoundException(metal);
         }
     }
 
@@ -46,7 +47,7 @@ public class FetchDataFacade {
             redisSpotList.setValue(key, data);
             return data;
         } else {
-            throw new RuntimeException("Metal not found");
+            throw new MetalNotFoundException(metal);
         }
     }
 }

@@ -33,7 +33,10 @@ public class UserController {
 
     @PostMapping("loginUser")
     public ResponseEntity<String> loginUser(@RequestBody UserDTO user) {
-        return userRepo.authenticateUser(user);
+        if (userRepo.authenticateUser(user)) {
+            return new ResponseEntity<>("You are authorized to use your services!", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("You are not authorized user!", HttpStatus.NOT_FOUND);
     }
 
     @GetMapping(value = "getUser/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
