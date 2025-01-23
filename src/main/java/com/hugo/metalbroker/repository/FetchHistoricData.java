@@ -1,4 +1,4 @@
-package com.hugo.metalbroker.service.implementations;
+package com.hugo.metalbroker.repository;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -14,7 +14,7 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.JsonFormat;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
-import com.hugo.metalbroker.service.FetchHistoricData;
+import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,18 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class FetchHistoricDataImpl implements FetchHistoricData {
+public class FetchHistoricData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Logger LOGGER = Logger.getLogger(FetchHistoricDataImpl.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FetchHistoricData.class.getName());
     private int checker = 0;
-    private Logger log = Logger.getLogger("FetchHistoricDataImpl.class");
 
-    public FetchHistoricDataImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public FetchHistoricData(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Scheduled(fixedRate = 10000)
-    @Override
     public boolean data() {
         boolean historicDataSilver = false;
         boolean historicDataGold = false;
@@ -48,7 +46,6 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
         return (historicDataSilver && historicDataGold);
     }
 
-    @Override
     public boolean updateData(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
 
@@ -87,7 +84,6 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
         return false;
     }
 
-    @Override
     public boolean storeData(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
         RestTemplate restTemplate = new RestTemplate();
@@ -111,14 +107,12 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
         return (value > 0);
     }
 
-    @Override
-    public List<HistoricItems> getItems(String metal) {
-        log.info("Get Items method is being invoked");
+    public HistoricItemsList getItems(String metal) {
         String query = "SELECT * FROM HISTORIC_ITEMS WHERE metal=:metal";
         Map<String, Object> params = new HashMap<>();
         params.put("metal", metal);
 
-        return namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> HistoricItems.newBuilder()
+        List<HistoricItems> data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> HistoricItems.newBuilder()
                 .setDate(sqlDateToGoogleTimestamp(rs.getDate("date")))
                 .setMetal(rs.getString("metal"))
                 .setWeightUnit(rs.getString("weight_unit"))
@@ -129,6 +123,9 @@ public class FetchHistoricDataImpl implements FetchHistoricData {
                 .setMA50(rs.getDouble("MA50"))
                 .setMA200(rs.getDouble("MA200"))
                 .build());
+        HistoricItemsList.Builder historicItemsListBuilder = HistoricItemsList.newBuilder();
+        historicItemsListBuilder.addAllItems(data);
+        return historicItemsListBuilder.build();
     }
 
     public Timestamp sqlDateToGoogleTimestamp(Date date) {

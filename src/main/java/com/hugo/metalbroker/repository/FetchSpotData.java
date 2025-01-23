@@ -1,4 +1,4 @@
-package com.hugo.metalbroker.service.implementations;
+package com.hugo.metalbroker.repository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -16,7 +16,7 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.JsonFormat;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
-import com.hugo.metalbroker.service.FetchSpotData;
+import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,17 +24,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class FetchSpotDataImpl implements FetchSpotData {
+public class FetchSpotData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Logger LOGGER = Logger.getLogger(FetchSpotDataImpl.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FetchSpotData.class.getName());
     private int checker = 0;
 
-    public FetchSpotDataImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public FetchSpotData(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Scheduled(fixedRate = 10000)
-    @Override
     public boolean data() {
         boolean spotDataSilver = false;
         boolean spotDataGold = false;
@@ -49,7 +48,6 @@ public class FetchSpotDataImpl implements FetchSpotData {
         return (spotDataSilver && spotDataGold);
     }
 
-    @Override
     public boolean updateData(String url) {
         RestTemplate restTemplate = new RestTemplate();
         JsonNode response = restTemplate.getForObject(url, JsonNode.class);
@@ -86,7 +84,6 @@ public class FetchSpotDataImpl implements FetchSpotData {
         return false;
     }
 
-    @Override
     public boolean storeData(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_SPOT_URL")) ? "silver" : "gold";
 
@@ -110,13 +107,12 @@ public class FetchSpotDataImpl implements FetchSpotData {
         return (value > 0);
     }
 
-    @Override
-    public List<SpotItems> getItems(String metal) {
+    public SpotItemsList getItems(String metal) {
         String query = "SELECT * FROM SPOT_ITEMS WHERE metal=:metal";
         Map<String, Object> params = new HashMap<>();
         params.put("metal", metal);
 
-        return namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
+        List<SpotItems> data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
                 .setDate(localDateTimeToGoogleTimestamp((LocalDateTime) rs.getObject("date")))
                 .setMetal(rs.getString("metal"))
                 .setWeightUnit(rs.getString("weight_unit"))
@@ -126,6 +122,9 @@ public class FetchSpotDataImpl implements FetchSpotData {
                 .setValue(rs.getDouble("value"))
                 .setPerformance(rs.getDouble("performance"))
                 .build());
+        SpotItemsList.Builder spotItemsListBuilder = SpotItemsList.newBuilder();
+        spotItemsListBuilder.addAllItems(data);
+        return spotItemsListBuilder.build();
     }
 
     public Timestamp localDateTimeToGoogleTimestamp(LocalDateTime localDateTime) {

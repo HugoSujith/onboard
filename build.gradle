@@ -19,18 +19,26 @@ repositories {
 }
 
 dependencies {
+	// Spring boot starter dependencies
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 //	implementation "org.springframework.boot:spring-boot-starter-security"
 
-	runtimeOnly 'com.mysql:mysql-connector-j'
-
+	// Protobuf dependencies
 	implementation 'com.google.protobuf:protobuf-java:4.29.3'
 	implementation 'com.google.protobuf:protobuf-java-util:4.29.3'
 
+	// Database connectors dependencies
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Spring boot data redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.4.1'
+
+	// Dotenv dependencies
 	implementation 'io.github.cdimascio:dotenv-java:3.1.0'
 
+	// Spring boot test dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepo {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final Logger log = Logger.getLogger(getClass().getName());
+    private final Logger LOGGER = Logger.getLogger(getClass().getName());
 
     public UserRepo(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -48,13 +48,12 @@ public class UserRepo {
                     .build());
 
             if (!users.isEmpty()) {
-                log.info(users.getFirst().toString());
                 return users.getFirst();
             } else {
-                log.info("No user found probably!");
+                LOGGER.info("No user found probably!");
             }
         } catch (Exception e) {
-            log.info(e.getMessage());
+            LOGGER.info(e.getMessage());
             return null;
         }
         return null;
@@ -76,7 +75,7 @@ public class UserRepo {
                 int rowsAffected = namedParameterJdbcTemplate.update(query, params);
                 return rowsAffected > 0;
             } catch (Exception e) {
-                log.info(e.getMessage());
+                LOGGER.info(e.getMessage());
                 throw new RuntimeException("Error while adding user", e);
             }
         }
@@ -97,7 +96,7 @@ public class UserRepo {
                 return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            log.info(e.getMessage());
+            LOGGER.info(e.getMessage());
             throw new RuntimeException("Error while authenticating user", e);
         }
     }

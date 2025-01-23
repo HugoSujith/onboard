@@ -1,6 +1,7 @@
 package com.hugo.metalbroker.configuration;
 
 import com.google.protobuf.util.JsonFormat;
+import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricPerformance;

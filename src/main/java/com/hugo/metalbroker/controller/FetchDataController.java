@@ -1,14 +1,9 @@
 package com.hugo.metalbroker.controller;
 
-import java.util.List;
-import java.util.logging.Logger;
-
-import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
+import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
-import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
-import com.hugo.metalbroker.service.implementations.FetchHistoricDataImpl;
-import com.hugo.metalbroker.service.implementations.FetchSpotDataImpl;
+import com.hugo.metalbroker.repository.FetchSpotData;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,36 +13,21 @@ import org.springframework.web.bind.annotation.RestController;
 @Controller
 @RestController
 public class FetchDataController {
-    private final FetchHistoricDataImpl historicData;
-    private final FetchSpotDataImpl spotData;
-    Logger log = Logger.getLogger("FetchHistoricData.class");
+    private final FetchDataFacade dataFacade;
+    private final FetchSpotData spotData;
 
-    public FetchDataController(FetchHistoricDataImpl historicData, FetchSpotDataImpl spotData) {
-        this.historicData = historicData;
+    public FetchDataController(FetchDataFacade dataFacade, FetchSpotData spotData) {
+        this.dataFacade = dataFacade;
         this.spotData = spotData;
     }
 
     @GetMapping(path = "/historicData/{metal}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HistoricItemsList getHistoricData(@PathVariable String metal) {
-        if (metal.equals("gold") || metal.equals("silver")) {
-            List<HistoricItems> data = historicData.getItems(metal);
-            HistoricItemsList.Builder historicItemsListBuilder = HistoricItemsList.newBuilder();
-            historicItemsListBuilder.addAllItems(data);
-            return historicItemsListBuilder.build();
-        } else {
-            throw new RuntimeException("Metal not found");
-        }
+        return dataFacade.getHistoricData(metal);
     }
 
     @GetMapping(path = "/spotData/{metal}", produces = MediaType.APPLICATION_JSON_VALUE)
     public SpotItemsList getSpotData(@PathVariable String metal) {
-        if (metal.equals("gold") || metal.equals("silver")) {
-            List<SpotItems> data = spotData.getItems(metal);
-            SpotItemsList.Builder spotItemsListBuilder = SpotItemsList.newBuilder();
-            spotItemsListBuilder.addAllItems(data);
-            return spotItemsListBuilder.build();
-        } else {
-            throw new RuntimeException("Metal not found");
-        }
+        return dataFacade.getSpotData(metal);
     }
 }
