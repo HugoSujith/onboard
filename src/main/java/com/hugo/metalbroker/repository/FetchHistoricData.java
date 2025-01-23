@@ -2,7 +2,6 @@ package com.hugo.metalbroker.repository;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +10,9 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.JsonFormat;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
+import com.hugo.metalbroker.utils.ProtoUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,9 +24,11 @@ public class FetchHistoricData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private static final Logger LOGGER = Logger.getLogger(FetchHistoricData.class.getName());
     private int checker = 0;
+    private final ProtoUtils protoUtils;
 
-    public FetchHistoricData(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public FetchHistoricData(NamedParameterJdbcTemplate namedParameterJdbcTemplate, ProtoUtils protoUtils) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.protoUtils = protoUtils;
     }
 
     @Scheduled(fixedRate = 10000)
@@ -59,7 +59,7 @@ public class FetchHistoricData {
                 JsonNode historicDataJson = embeddedItems.get(embeddedItems.size() - 1);
 
                 try {
-                    Struct historicData = parseJsonToProto(historicDataJson);
+                    Struct historicData = protoUtils.parseJsonToProto(historicDataJson);
 
                     LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
                     Date sqlDate = Date.valueOf(date);
@@ -93,7 +93,7 @@ public class FetchHistoricData {
             ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
             for (JsonNode historicDataJson : embeddedItems) {
                 try {
-                    Struct historicData = parseJsonToProto(historicDataJson);
+                    Struct historicData = protoUtils.parseJsonToProto(historicDataJson);
                     LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
                     Date sqlDate = Date.valueOf(date);
 
@@ -113,7 +113,7 @@ public class FetchHistoricData {
         params.put("metal", metal);
 
         List<HistoricItems> data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> HistoricItems.newBuilder()
-                .setDate(sqlDateToGoogleTimestamp(rs.getDate("date")))
+                .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
                 .setMetal(rs.getString("metal"))
                 .setWeightUnit(rs.getString("weight_unit"))
                 .setHigh(rs.getDouble("high"))
@@ -128,15 +128,6 @@ public class FetchHistoricData {
         return historicItemsListBuilder.build();
     }
 
-    public Timestamp sqlDateToGoogleTimestamp(Date date) {
-        LocalDate localDate = date.toLocalDate();
-
-        return Timestamp.newBuilder()
-                .setSeconds(localDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC))
-                .setNanos(0)
-                .build();
-    }
-
     public int insertIntoDB(String metal, Struct historicData, Date sqlDate) {
         String insertQuery =
                 "INSERT INTO historic_items (metal, date, open, close, high, low, ma50, ma200, weight_unit) VALUES (:metal, :date, :open, :close, :high, :low, :ma50, :ma200, :weightUnit)";
@@ -146,32 +137,17 @@ public class FetchHistoricData {
         return namedParameterJdbcTemplate.update(insertQuery, params);
     }
 
-    public Struct parseJsonToProto(JsonNode historicDataJson) throws Exception {
-        String jsonToStr = historicDataJson.toString();
-        Struct.Builder historicDataBuilder = Struct.newBuilder();
-        JsonFormat.parser().ignoringUnknownFields().merge(jsonToStr, historicDataBuilder);
-        return historicDataBuilder.build();
-    }
-
     public Map<String, Object> buildParamsForData(Struct historicData, Date sqlDate, String metal) {
         Map<String, Object> params = new HashMap<>();
         params.put("date", sqlDate);
         params.put("metal", metal);
-        params.put("ma200", getFieldValue(historicData, "MA200"));
-        params.put("ma50", getFieldValue(historicData, "MA50"));
-        params.put("close", getFieldValue(historicData, "close"));
-        params.put("open", getFieldValue(historicData, "open"));
-        params.put("high", getFieldValue(historicData, "high"));
-        params.put("low", getFieldValue(historicData, "low"));
+        params.put("ma200", protoUtils.getFieldValue(historicData, "MA200"));
+        params.put("ma50", protoUtils.getFieldValue(historicData, "MA50"));
+        params.put("close", protoUtils.getFieldValue(historicData, "close"));
+        params.put("open", protoUtils.getFieldValue(historicData, "open"));
+        params.put("high", protoUtils.getFieldValue(historicData, "high"));
+        params.put("low", protoUtils.getFieldValue(historicData, "low"));
         params.put("weightUnit", historicData.getFieldsMap().get("weight_unit").getStringValue());
         return params;
     }
-
-    public double getFieldValue(Struct historicData, String fieldName) {
-        if (historicData.getFieldsMap().get(fieldName) != null) {
-            return historicData.getFieldsMap().get(fieldName).getNumberValue();
-        }
-        return -1000;
-    }
-
 }
