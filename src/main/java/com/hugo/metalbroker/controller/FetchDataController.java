@@ -3,7 +3,6 @@ package com.hugo.metalbroker.controller;
 import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
-import com.hugo.metalbroker.repository.FetchSpotData;
 import com.hugo.metalbroker.service.HistoricData;
 import com.hugo.metalbroker.service.SpotData;
 import org.springframework.http.MediaType;
