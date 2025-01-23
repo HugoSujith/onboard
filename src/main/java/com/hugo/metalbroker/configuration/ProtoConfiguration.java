@@ -1,7 +1,6 @@
 package com.hugo.metalbroker.configuration;
 
 import com.google.protobuf.util.JsonFormat;
-import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricPerformance;
@@ -17,10 +16,9 @@ import org.springframework.http.converter.protobuf.ProtobufJsonFormatHttpMessage
 
 @Configuration
 public class ProtoConfiguration {
-    @Bean
-    @Primary
-    ProtobufHttpMessageConverter protobufHttpMessageConverter() {
-        JsonFormat.TypeRegistry typeRegistry = JsonFormat.TypeRegistry
+
+    private static JsonFormat.TypeRegistry createTypeRegistry() {
+        return JsonFormat.TypeRegistry
                 .newBuilder()
                 .add(HistoricItems.getDescriptor())
                 .add(HistoricItemsList.getDescriptor())
@@ -30,9 +28,22 @@ public class ProtoConfiguration {
                 .add(Transactions.getDescriptor())
                 .add(UserDTO.getDescriptor())
                 .build();
-        JsonFormat.Parser parser = JsonFormat.parser();
-        JsonFormat.Printer printer = JsonFormat.printer()
-                .usingTypeRegistry(typeRegistry);
+    }
+
+    private static JsonFormat.Parser createParser() {
+        return JsonFormat.parser();
+    }
+
+    private static JsonFormat.Printer createPrinter(JsonFormat.TypeRegistry typeRegistry) {
+        return JsonFormat.printer().usingTypeRegistry(typeRegistry);
+    }
+
+    @Bean
+    @Primary
+    public ProtobufHttpMessageConverter protobufHttpMessageConverter() {
+        JsonFormat.TypeRegistry typeRegistry = createTypeRegistry();
+        JsonFormat.Parser parser = createParser();
+        JsonFormat.Printer printer = createPrinter(typeRegistry);
 
         return new ProtobufJsonFormatHttpMessageConverter(parser, printer);
     }
