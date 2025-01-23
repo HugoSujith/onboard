@@ -1,0 +1,15 @@
+spring:
+    application:
+        name: metalbroker
+
+    datasource:
+        url: jdbc:mysql://localhost:3306/onboard?useSSL=false&serverTimezone=UTC
+        username: root
+        password: HugoSujith@123
+
+    data:
+        jdbc:
+            dialect: mysql
+        redis:
+            host: localhost
+            port: 6379
