@@ -35,12 +35,12 @@ public class FetchDataController {
         return dataFacade.getSpotData(metal);
     }
 
-    @GetMapping(path = "/historicData/{metal}/{pageNum}")
+    @GetMapping(path = "/historicData/{metal}/{pageNum}", produces = MediaType.APPLICATION_JSON_VALUE)
     public HistoricItemsList getHistoricDataPage(@PathVariable String metal, @PathVariable int pageNum) {
         return historicData.fetchPaginatedData(metal, pageNum);
     }
 
-    @GetMapping(path = "/spotData/{metal}/{pageNum}")
+    @GetMapping(path = "/spotData/{metal}/{pageNum}", produces = MediaType.APPLICATION_JSON_VALUE)
     public SpotItemsList getSpotDataPage(@PathVariable String metal, @PathVariable int pageNum) {
         return spotData.fetchPaginatedData(metal, pageNum);
     }
