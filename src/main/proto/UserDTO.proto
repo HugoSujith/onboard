@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package User;
+option java_multiple_files = true;
+option java_package = "com.hugo.metalbroker.model.user";
+//option java_outer_classname = "User";
+
+message UserDTO {
+  string username = 1;
+  string password = 2;
+  string firstname = 3;
+  string lastname = 4;
+  int32 balance = 5;
+}
