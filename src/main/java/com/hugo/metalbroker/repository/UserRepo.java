@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepo {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final Logger LOGGER = Logger.getLogger(getClass().getName());
 
     public UserRepo(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -34,7 +33,6 @@ public class UserRepo {
     }
 
     public UserDTO getUserByUsername(String username) {
-        LOGGER.info("The username passed into repo is: " + username);
         String query = "SELECT * FROM USER WHERE USERNAME = :username";
         Map<String, Object> params = new HashMap<>();
         params.put("username", username);
@@ -49,11 +47,8 @@ public class UserRepo {
                     .build());
 
             if (!users.isEmpty()) {
-                LOGGER.info("user present in repo: " + users.getFirst().toString());
                 return users.getFirst();
             } else {
-                LOGGER.info("user absent in repo: ");
-                LOGGER.info(String.valueOf(users.size()));
                 throw new UserNotFoundException(username);
             }
         } catch (Exception e) {

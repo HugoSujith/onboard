@@ -6,11 +6,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
+import com.hugo.metalbroker.exceptions.DataUpdateFailureException;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import com.hugo.metalbroker.utils.ProtoUtils;
@@ -23,7 +23,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class FetchSpotData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Logger LOGGER = Logger.getLogger(FetchSpotData.class.getName());
     private int checker = 0;
     private final ProtoUtils protoUtils;
 
@@ -75,7 +74,7 @@ public class FetchSpotData {
                         return insertIntoDB(metal, spotData, sqlDate) > 0;
                     }
                 } catch (Exception e) {
-                    LOGGER.info("Error processing spot data: " + e.getMessage());
+                    throw new DataUpdateFailureException(this.getClass().getName());
                 }
             }
         }
@@ -98,7 +97,6 @@ public class FetchSpotData {
 
                     value = insertIntoDB(metal, spotData, sqlDate);
                 } catch (Exception e) {
-                    LOGGER.info(e.getMessage());
                     return false;
                 }
             }

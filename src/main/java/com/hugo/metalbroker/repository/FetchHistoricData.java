@@ -5,11 +5,11 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
+import com.hugo.metalbroker.exceptions.DataUpdateFailureException;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.utils.ProtoUtils;
@@ -22,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class FetchHistoricData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private static final Logger LOGGER = Logger.getLogger(FetchHistoricData.class.getName());
     private int checker = 0;
     private final ProtoUtils protoUtils;
 
@@ -76,7 +75,7 @@ public class FetchHistoricData {
                         return insertIntoDB(metal, historicData, sqlDate) > 0;
                     }
                 } catch (Exception e) {
-                    LOGGER.info("Error processing historic data: " + e.getMessage());
+                    throw new DataUpdateFailureException(this.getClass().getName());
                 }
             }
         }
@@ -99,7 +98,6 @@ public class FetchHistoricData {
 
                     value = insertIntoDB(metal, historicData, sqlDate);
                 } catch (Exception e) {
-                    LOGGER.info(e.getMessage());
                     return false;
                 }
             }

@@ -1,9 +1,6 @@
 package com.hugo.metalbroker.controller;
-
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,8 +12,4 @@ public class HomeController {
         return "Welcome to metal broker where you can trade gold and silver!";
     }
 
-    @GetMapping("csrf")
-    public CsrfToken getCsrfToken(HttpServletRequest servlet) {
-        return (CsrfToken) servlet.getAttribute("_csrf");
-    }
 }
