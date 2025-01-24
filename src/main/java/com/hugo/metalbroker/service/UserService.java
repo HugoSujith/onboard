@@ -1,9 +1,11 @@
 package com.hugo.metalbroker.service;
 
+import java.util.Map;
+
 import com.hugo.metalbroker.model.user.UserDTO;
 
 public interface UserService {
-    UserDTO login(UserDTO user);
+    public Map.Entry<UserDTO, String> login(UserDTO user);
 
     boolean addUsersToDB(UserDTO user);
 }

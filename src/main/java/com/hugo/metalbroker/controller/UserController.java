@@ -1,5 +1,7 @@
 package com.hugo.metalbroker.controller;
 
+import java.util.Map;
+
 import com.hugo.metalbroker.model.user.UserDTO;
 import com.hugo.metalbroker.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -30,8 +32,9 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody UserDTO user) {
-        if (userServiceImpl.login(user) == user) {
-            return new ResponseEntity<>("You are authorized to use your services!", HttpStatus.OK);
+        Map.Entry<UserDTO, String> loginResponse = userServiceImpl.login(user);
+        if (loginResponse.getKey() == user) {
+            return new ResponseEntity<>(loginResponse.getValue(), HttpStatus.OK);
         }
         return new ResponseEntity<>("You are not authorized user!", HttpStatus.NOT_FOUND);
     }

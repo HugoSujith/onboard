@@ -3,9 +3,7 @@ package com.hugo.metalbroker.repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
-import com.hugo.metalbroker.exceptions.AuthenticationFailureException;
 import com.hugo.metalbroker.exceptions.RegistrationFailureException;
 import com.hugo.metalbroker.exceptions.UserNotFoundException;
 import com.hugo.metalbroker.model.user.UserDTO;
