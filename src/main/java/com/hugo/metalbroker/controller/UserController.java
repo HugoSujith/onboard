@@ -1,7 +1,10 @@
 package com.hugo.metalbroker.controller;
 
+import java.util.logging.Logger;
+
 import com.hugo.metalbroker.model.user.UserDTO;
 import com.hugo.metalbroker.repository.UserRepo;
+import com.hugo.metalbroker.service.implementation.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,31 +19,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-    private final UserRepo userRepo;
+    private final UserService userService;
 
-    public UserController(UserRepo userRepo) {
-        this.userRepo = userRepo;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PostMapping("registerUser")
+    @PostMapping("register")
     public ResponseEntity<Boolean> registerUser(@RequestBody UserDTO user) {
-        boolean response = userRepo.addUsersToDB(user);
+        Logger.getLogger(this.getClass().getName()).info("Entering User Controller register");
+        Logger.getLogger(this.getClass().getName()).info(user.toString() + ": Controller");
+        boolean response = userService.addUsersToDB(user);
         if (response) {
+            Logger.getLogger(this.getClass().getName()).info(user.toString() + ": Controller");
             return new ResponseEntity<>(Boolean.TRUE, HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(Boolean.FALSE, HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("loginUser")
+    @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody UserDTO user) {
-        if (userRepo.authenticateUser(user)) {
+        Logger.getLogger(this.getClass().getName()).info("Entering User Controller login");
+        if (userService.login(user) == user) {
+            Logger.getLogger(this.getClass().getName()).info(user.toString() + ": Controller");
             return new ResponseEntity<>("You are authorized to use your services!", HttpStatus.OK);
         }
         return new ResponseEntity<>("You are not authorized user!", HttpStatus.NOT_FOUND);
-    }
-
-    @GetMapping(value = "getUser/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserDTO getUserByUsername(@PathVariable String username) {
-        return userRepo.getUserByUsername(username);
     }
 }

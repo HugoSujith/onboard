@@ -34,6 +34,7 @@ public class UserRepo {
     }
 
     public UserDTO getUserByUsername(String username) {
+        LOGGER.info("The username passed into repo is: " + username);
         String query = "SELECT * FROM USER WHERE USERNAME = :username";
         Map<String, Object> params = new HashMap<>();
         params.put("username", username);
@@ -48,8 +49,11 @@ public class UserRepo {
                     .build());
 
             if (!users.isEmpty()) {
+                LOGGER.info("user present in repo: " + users.getFirst().toString());
                 return users.getFirst();
             } else {
+                LOGGER.info("user absent in repo: ");
+                LOGGER.info(String.valueOf(users.size()));
                 throw new UserNotFoundException(username);
             }
         } catch (Exception e) {
@@ -67,8 +71,6 @@ public class UserRepo {
             params.put("last_name", user.getLastname());
             params.put("balance", user.getBalance());
 
-            System.out.println("Map contents: " + params);
-
             try {
                 int rowsAffected = namedParameterJdbcTemplate.update(query, params);
                 return rowsAffected > 0;
@@ -77,19 +79,5 @@ public class UserRepo {
             }
         }
         return false;
-    }
-
-    public boolean authenticateUser(UserDTO user) {
-        String query = "SELECT COUNT(*) FROM USER WHERE USERNAME = :username AND PASSWORD = :password";
-        Map<String, Object> params = new HashMap<>();
-        params.put("username", user.getUsername());
-        params.put("password", user.getPassword());
-
-        try {
-            Integer count = namedParameterJdbcTemplate.queryForObject(query, params, Integer.class);
-            return (count != null && count > 0);
-        } catch (Exception e) {
-            throw new AuthenticationFailureException(user.getUsername());
-        }
     }
 }

@@ -22,7 +22,7 @@ dependencies {
 	// Spring boot starter dependencies
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-//	implementation "org.springframework.boot:spring-boot-starter-security"
+	implementation "org.springframework.boot:spring-boot-starter-security"
 
 	// Protobuf dependencies
 	implementation 'com.google.protobuf:protobuf-java:4.29.3'
@@ -40,8 +40,7 @@ dependencies {
 
 	// Spring boot test dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
