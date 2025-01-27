@@ -7,6 +7,7 @@ import com.hugo.metalbroker.exceptions.UserNotFoundException;
 import com.hugo.metalbroker.model.user.UserDTO;
 import com.hugo.metalbroker.repository.UserRepo;
 import com.hugo.metalbroker.utils.JWTUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,10 +29,10 @@ public class UserServiceImpl implements com.hugo.metalbroker.service.UserService
     }
 
     @Override
-    public Map.Entry<UserDTO, String> login(UserDTO user) {
+    public Map.Entry<UserDTO, String> login(UserDTO user, HttpServletResponse response) {
         Authentication auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         if (auth.isAuthenticated()) {
-            String userJWTToken = jwtUtils.generateToken(user.getUsername());
+            String userJWTToken = jwtUtils.generateToken(user.getUsername(), response);
             return new AbstractMap.SimpleEntry<>(user, userJWTToken);
         }
         throw new UserNotFoundException(user.getUsername());

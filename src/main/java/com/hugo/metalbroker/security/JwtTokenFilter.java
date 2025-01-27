@@ -5,12 +5,11 @@ import java.io.IOException;
 import com.hugo.metalbroker.model.user.UserDTO;
 import com.hugo.metalbroker.repository.UserRepo;
 import com.hugo.metalbroker.utils.JWTUtils;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -30,20 +29,26 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
+
+        String username = "";
+        String token = "";
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("JWT_TOKEN".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    username = jwtTokenUtils.decodeJWTToken(token).getSubject();
+                    break;
+                }
+            }
+        }
+
+        if (token.isEmpty()) {
             chain.doFilter(request, response);
             return;
         }
 
-        String token = header.split(" ")[1].trim();
-        Claims claims = jwtTokenUtils.decodeJWTToken(token);
-        if (claims == null) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        String username = claims.getSubject();
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDTO userData = userRepo.getUserByUsername(username);
             UserDetailsImpl userDetails = new UserDetailsImpl(userData);
@@ -58,5 +63,4 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
         chain.doFilter(request, response);
     }
-
 }

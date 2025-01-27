@@ -10,6 +10,9 @@ import javax.crypto.spec.SecretKeySpec;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,9 +23,9 @@ public class JWTUtils {
         secretKey = new SecretKeySpec(Dotenv.load().get("SECRET_KEY").getBytes(), "HmacSHA256");
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, HttpServletResponse response) {
         Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .claims(claims)
                 .subject(username)
                 .issuer("Sujith")
@@ -30,6 +33,13 @@ public class JWTUtils {
                 .expiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
                 .signWith(secretKey)
                 .compact();
+        Cookie cookie = new Cookie("JWT_TOKEN", token);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return token;
     }
 
     public Claims decodeJWTToken(String jwt) {

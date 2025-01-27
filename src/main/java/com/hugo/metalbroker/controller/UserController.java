@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.hugo.metalbroker.model.user.UserDTO;
 import com.hugo.metalbroker.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,8 +32,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody UserDTO user) {
-        Map.Entry<UserDTO, String> loginResponse = userServiceImpl.login(user);
+    public ResponseEntity<String> loginUser(@RequestBody UserDTO user, HttpServletResponse response) {
+        Map.Entry<UserDTO, String> loginResponse = userServiceImpl.login(user, response);
         if (loginResponse.getKey() == user) {
             return new ResponseEntity<>(loginResponse.getValue(), HttpStatus.OK);
         }
