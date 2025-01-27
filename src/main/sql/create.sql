@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS historic_items (
 
 CREATE TABLE IF NOT EXISTS spot_items (
     date DATETIME NOT NULL,
-    metal VARCHAR(10) NOT NULL,
+    metal VARCHAR(64) NOT NULL,
     weight_unit VARCHAR(50) NOT NULL,
     ask DOUBLE NOT NULL,
     mid DOUBLE NOT NULL,
@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS historic_performance (
     onem DOUBLE NOT NULL,
     oney DOUBLE NOT NULL,
     teny DOUBLE NOT NULL,
-    ytd DOUBLE NOT NULL
+    ytd DOUBLE NOT NULL,
+    metal VARCHAR(64) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
@@ -44,7 +45,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     grams DOUBLE NOT NULL,
     price DOUBLE NOT NULL,
     status VARCHAR(256) NOT NULL,
-    metal VARCHAR(10) NOT NULL,
+    metal VARCHAR(64) NOT NULL,
     username VARCHAR(256) NOT NULL
 );
 

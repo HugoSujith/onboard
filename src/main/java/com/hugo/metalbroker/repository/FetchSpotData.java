@@ -17,10 +17,10 @@ import com.hugo.metalbroker.utils.ProtoUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 
-@Service
+@Repository
 public class FetchSpotData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private int checker = 0;
@@ -110,7 +110,7 @@ public class FetchSpotData {
         params.put("metal", metal);
 
         List<SpotItems> data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
-                .setDate(protoUtils.localDateTimeToGoogleTimestamp((LocalDateTime) rs.getObject("date")))
+                .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
                 .setMetal(rs.getString("metal"))
                 .setWeightUnit(rs.getString("weight_unit"))
                 .setAsk(rs.getDouble("ask"))

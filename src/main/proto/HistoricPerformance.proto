@@ -1,0 +1,18 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hugo.metalbroker.model.datavalues.historic";
+//option java_outer_classname = "HistoricPerformance";
+
+message HistoricPerformance {
+  google.protobuf.Timestamp date = 1;
+  double fiveD = 2;
+  double oneM = 3;
+  double ytd = 4;
+  double oneY = 5;
+  double fiveY = 6;
+  double tenY = 7;
+  double max = 8;
+  string metal = 9;
+}

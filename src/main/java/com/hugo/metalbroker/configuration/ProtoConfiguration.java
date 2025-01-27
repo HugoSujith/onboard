@@ -13,10 +13,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufJsonFormatHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class ProtoConfiguration {
 
+    @Bean
     private static JsonFormat.TypeRegistry createTypeRegistry() {
         return JsonFormat.TypeRegistry
                 .newBuilder()
@@ -28,6 +30,13 @@ public class ProtoConfiguration {
                 .add(Transactions.getDescriptor())
                 .add(UserDTO.getDescriptor())
                 .build();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(new ProtobufHttpMessageConverter());
+        return restTemplate;
     }
 
     private static JsonFormat.Parser createParser() {

@@ -13,8 +13,8 @@ message HistoricItems {
   double close = 4;
   double high = 5;
   double low = 6;
-  double MA50 = 7;
-  double MA200 = 8;
+  optional double MA50 = 7;
+  optional double MA200 = 8;
   string metal = 9;
 }
 
