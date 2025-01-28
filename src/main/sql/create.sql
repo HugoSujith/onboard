@@ -73,15 +73,15 @@ CREATE TABLE IF NOT EXISTS wallet (
     user_id VARCHAR(255),
     PRIMARY KEY (wallet_id, user_id),
     status ENUM('ACTIVE', 'INACTIVE', 'BLOCKED') DEFAULT 'ACTIVE',
-    currency_code CHAR(3),
-    FOREIGN KEY (user_id) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (currency_code) REFERENCES currency(currency_code)
+    FOREIGN KEY (user_id) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS user_wallet_info (
     wallet_id VARCHAR(30),
     metal VARCHAR(64),
+    currency_code CHAR(3),
     grams DOUBLE,
-    PRIMARY KEY (wallet_id, metal),
-    FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id) ON DELETE CASCADE ON UPDATE CASCADE
+    PRIMARY KEY (wallet_id, metal, currency_code),
+    FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (currency_code) REFERENCES currency(currency_code)
 );
