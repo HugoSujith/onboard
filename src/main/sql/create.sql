@@ -39,20 +39,21 @@ CREATE TABLE IF NOT EXISTS historic_performance (
     metal VARCHAR(64) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS transactions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    date_purchased DATETIME NOT NULL,
-    grams DOUBLE NOT NULL,
-    price DOUBLE NOT NULL,
-    status VARCHAR(256) NOT NULL,
-    metal VARCHAR(64) NOT NULL,
-    username VARCHAR(256) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS user (
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     firstname VARCHAR(256) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
     balance INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+    id VARCHAR(24) PRIMARY KEY,
+    date_purchased DATETIME NOT NULL,
+    grams DOUBLE NOT NULL,
+    price DOUBLE NOT NULL,
+    status VARCHAR(256) NOT NULL,
+    metal VARCHAR(64) NOT NULL,
+    username VARCHAR(256) NOT NULL,
+    FOREIGN KEY (username) REFERENCES user(username)
 );

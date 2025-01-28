@@ -7,7 +7,7 @@ option java_package = "com.hugo.metalbroker.model.transactions";
 //option java_outer_classname = "Transactions";
 
 message Transactions {
-  int64 id = 1;
+  optional string id = 1;
   string username = 2;
   google.protobuf.Timestamp datePurchased = 3;
   double grams = 4;
