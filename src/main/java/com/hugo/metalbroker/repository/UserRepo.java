@@ -19,7 +19,7 @@ public class UserRepo {
     }
 
     public boolean findIfUserPresent(UserDTO user) {
-        String query = "SELECT COUNT(*) FROM USER WHERE USERNAME = :username";
+        String query = SQLQueryConstants.FIND_COUNT_OF_USERS_BY_USERNAME;
         Map<String, Object> params = new HashMap<>();
         params.put("username", user.getUsername());
         try {
@@ -31,7 +31,7 @@ public class UserRepo {
     }
 
     public UserDTO getUserByUsername(String username) {
-        String query = "SELECT * FROM USER WHERE USERNAME = :username";
+        String query = SQLQueryConstants.GET_ALL_USERS_BY_USERNAME;
         Map<String, Object> params = new HashMap<>();
         params.put("username", username);
 
@@ -56,7 +56,7 @@ public class UserRepo {
 
     public boolean addUsersToDB(UserDTO user) {
         if (!findIfUserPresent(user)) {
-            String query = "INSERT INTO USER (username, password, firstname, lastname, balance) VALUES (:username, :password, :first_name, :last_name, :balance)";
+            String query = SQLQueryConstants.INSERT_INTO_USER;
             Map<String, Object> params = new HashMap<>();
             params.put("username", user.getUsername());
             params.put("password", user.getPassword());

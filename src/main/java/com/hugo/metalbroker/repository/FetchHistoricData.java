@@ -63,7 +63,7 @@ public class FetchHistoricData {
                     LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
                     Date sqlDate = Date.valueOf(date);
 
-                    String checkQuery = "SELECT COUNT(*) FROM historic_items WHERE date = :date AND metal = :metal";
+                    String checkQuery = SQLQueryConstants.FIND_COUNT_OF_HISTORIC_ITEMS_BY_PK;
 
                     Map<String, Object> checkParams = new HashMap<>();
                     checkParams.put("date", sqlDate);
@@ -106,7 +106,7 @@ public class FetchHistoricData {
     }
 
     public HistoricItemsList getItems(String metal) {
-        String query = "SELECT * FROM HISTORIC_ITEMS WHERE metal=:metal";
+        String query = SQLQueryConstants.GET_ALL_FROM_HISTORIC_DATA_BY_METAL;
         Map<String, Object> params = new HashMap<>();
         params.put("metal", metal);
 
@@ -127,8 +127,7 @@ public class FetchHistoricData {
     }
 
     public int insertIntoDB(String metal, Struct historicData, Date sqlDate) {
-        String insertQuery =
-                "INSERT INTO historic_items (metal, date, open, close, high, low, ma50, ma200, weight_unit) VALUES (:metal, :date, :open, :close, :high, :low, :ma50, :ma200, :weightUnit)";
+        String insertQuery = SQLQueryConstants.INSERT_INTO_HISTORIC_ITEMS;
 
         Map<String, Object> params = buildParamsForData(historicData, sqlDate, metal);
 

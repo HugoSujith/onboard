@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,11 +35,9 @@ public class FetchHistoricPerformance {
     public boolean checkDataIsPresent(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
         RestTemplate restTemplate = new RestTemplate();
-        JsonNode response = restTemplate.getForObject(url, JsonNode.class).get("_embedded").get("performances");
+        JsonNode response = Objects.requireNonNull(restTemplate.getForObject(url, JsonNode.class)).get("_embedded").get("performances");
 
-        Logger.getLogger(this.getClass().getName()).info(response.toString());
-
-        String query = "SELECT * FROM HISTORIC_PERFORMANCE";
+        String query = SQLQueryConstants.GET_ALL_FROM_HISTORIC_PERFORMANCE;
         List<HistoricPerformance> performanceList = jdbcTemplate.query(query, (rs, rowNum) -> HistoricPerformance.newBuilder()
                 .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
                 .setMetal(metal)
@@ -57,7 +56,7 @@ public class FetchHistoricPerformance {
         if (performanceList.isEmpty() || !performanceList.getLast().getDate().toString().equals(protoUtils.sqlDateToGoogleTimestamp(todayDate).toString())) {
             Logger.getLogger(this.getClass().getName()).info("Inserting new performance data");
 
-            String insertQuery = "INSERT INTO historic_performance (date, fived, fivey, max, onem, oney, teny, ytd, metal) VALUES (:date, :fived, :fivey, :max, :onem, :oney, :teny, :ytd, :metal)";
+            String insertQuery = SQLQueryConstants.INSERT_INTO_HISTORIC_PERFORMANCE;
             Map<String, Object> params = new HashMap<>();
             params.put("date", Date.valueOf(today));
             params.put("fived", response.get("5D").asDouble());

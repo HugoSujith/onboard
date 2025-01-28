@@ -1,14 +1,11 @@
 package com.hugo.metalbroker.repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.hugo.metalbroker.model.user.WalletDTO;
 import com.hugo.metalbroker.utils.UIDGenerator;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -23,7 +20,7 @@ public class WalletRepo {
     }
 
     public boolean createWallet(String username) {
-        String query = "INSERT INTO wallet (wallet_id, user_id, status) VALUES (:wallet_id, :user_id, :status)";
+        String query = SQLQueryConstants.INSERT_INTO_WALLET;
         Map<String, Object> params = new HashMap<>();
         params.put("wallet_id", uidGenerator.generateUID(30));
         params.put("user_id", username);
@@ -34,7 +31,7 @@ public class WalletRepo {
     }
 
     public String getWalletIdByUsername(String username) {
-        String query = "SELECT * FROM WALLET WHERE user_id = :user_id";
+        String query = SQLQueryConstants.GET_ALL_WALLETS_FROM_USERNAME;
         Map<String, Object> params = new HashMap<>();
         params.put("user_id", username);
         List<WalletDTO> userWallet = jdbcTemplate.query(query, params, (rs, rowNum) -> {

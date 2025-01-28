@@ -62,7 +62,7 @@ public class FetchSpotData {
 
                     LocalDateTime sqlDate = OffsetDateTime.parse(spotData.getFieldsMap().get("date").getStringValue(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime();
 
-                    String checkQuery = "SELECT COUNT(*) FROM spot_items WHERE date = :date AND metal = :metal";
+                    String checkQuery = SQLQueryConstants.FIND_COUNT_OF_SPOT_ITEMS_BY_PK;
 
                     Map<String, Object> checkParams = new HashMap<>();
                     checkParams.put("date", sqlDate);
@@ -105,7 +105,7 @@ public class FetchSpotData {
     }
 
     public SpotItemsList getItems(String metal) {
-        String query = "SELECT * FROM SPOT_ITEMS WHERE metal=:metal";
+        String query = SQLQueryConstants.GET_ALL_FROM_SPOT_ITEMS_BY_METAL;
         Map<String, Object> params = new HashMap<>();
         params.put("metal", metal);
 
