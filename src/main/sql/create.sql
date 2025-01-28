@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE TABLE IF NOT EXISTS currency (
     currency_code CHAR(3),
     country_name VARCHAR(256),
-    PRIMARY KEY (currency_code)
+    PRIMARY KEY (currency_code),
+    UNIQUE (country_name)
 );
 
 CREATE TABLE IF NOT EXISTS wallet (
@@ -73,7 +74,9 @@ CREATE TABLE IF NOT EXISTS wallet (
     user_id VARCHAR(255),
     PRIMARY KEY (wallet_id, user_id),
     status ENUM('ACTIVE', 'INACTIVE', 'BLOCKED') DEFAULT 'ACTIVE',
-    FOREIGN KEY (user_id) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE (user_id),
+    UNIQUE (wallet_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_wallet_info (

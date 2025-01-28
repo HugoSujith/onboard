@@ -125,7 +125,7 @@ public class FetchSpotData {
     }
 
     public int insertIntoDB(String metal, Struct spotData, LocalDateTime sqlDate) {
-        String query = "INSERT INTO spot_items (metal, date, ask, mid, bid, value, performance, weight_unit) VALUES (:metal, :date, :ask, :mid, :bid, :value, :performance, :weightUnit)";
+        String query = SQLQueryConstants.INSERT_INTO_SPOT_ITEMS;
 
         Map<String, Object> params = buildParamsForData(spotData, sqlDate, metal);
 
