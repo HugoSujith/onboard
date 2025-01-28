@@ -5,7 +5,9 @@ import java.util.Map;
 
 import com.hugo.metalbroker.exceptions.UserNotFoundException;
 import com.hugo.metalbroker.model.user.UserDTO;
+import com.hugo.metalbroker.model.user.WalletDTO;
 import com.hugo.metalbroker.repository.UserRepo;
+import com.hugo.metalbroker.repository.WalletRepo;
 import com.hugo.metalbroker.utils.JWTUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,12 +22,14 @@ public class UserServiceImpl implements com.hugo.metalbroker.service.UserService
     private final BCryptPasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
     private final JWTUtils jwtUtils;
+    private final WalletRepo walletRepo;
 
-    public UserServiceImpl(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authManager, JWTUtils jwtUtils) {
+    public UserServiceImpl(UserRepo userRepo, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authManager, JWTUtils jwtUtils, WalletRepo walletRepo) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
         this.jwtUtils = jwtUtils;
+        this.walletRepo = walletRepo;
     }
 
     @Override
@@ -47,6 +51,8 @@ public class UserServiceImpl implements com.hugo.metalbroker.service.UserService
                 .setLastname(user.getLastname())
                 .setBalance(user.getBalance())
                 .build();
-        return userRepo.addUsersToDB(userEncrypted);
+        boolean registerUser = userRepo.addUsersToDB(userEncrypted);
+        boolean createUserWallet = walletRepo.createWallet(user.getUsername());
+        return registerUser && createUserWallet;
     }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.hugo.metalbroker.repository.WalletRepo;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,13 +19,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class JWTUtils {
     private final Key secretKey;
+    private final WalletRepo walletRepo;
 
-    public JWTUtils() {
+    public JWTUtils(WalletRepo walletRepo) {
+        this.walletRepo = walletRepo;
         secretKey = new SecretKeySpec(Dotenv.load().get("SECRET_KEY").getBytes(), "HmacSHA256");
     }
 
     public String generateToken(String username, HttpServletResponse response) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("wallet_id", walletRepo.getWalletIdByUsername(username));
         String token = Jwts.builder()
                 .claims(claims)
                 .subject(username)
@@ -38,7 +42,6 @@ public class JWTUtils {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         response.addCookie(cookie);
-
         return token;
     }
 

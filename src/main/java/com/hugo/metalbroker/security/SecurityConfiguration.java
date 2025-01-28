@@ -2,8 +2,6 @@ package com.hugo.metalbroker.security;
 
 import com.hugo.metalbroker.exceptions.SessionCreationPolicyFailureException;
 import com.hugo.metalbroker.service.implementation.BrokerUserDetailsServiceImpl;
-import com.hugo.metalbroker.utils.JWTUtils;
-import jakarta.servlet.Filter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

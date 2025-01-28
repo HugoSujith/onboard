@@ -3,12 +3,14 @@ package com.hugo.metalbroker.utils;
 import java.time.Instant;
 import java.util.Random;
 
-public class UIDGenerator {
+import org.springframework.stereotype.Component;
 
-    public String generateUID() {
+@Component
+public class UIDGenerator {
+    public String generateUID(int uidLength) {
         long timestamp = Instant.now().toEpochMilli();
         String prefix = Long.toString(timestamp);
-        String suffix = generateSuffix(24 - prefix.length() - 1);
+        String suffix = generateSuffix(uidLength - prefix.length() - 1);
         return prefix + "-" + suffix;
     }
 

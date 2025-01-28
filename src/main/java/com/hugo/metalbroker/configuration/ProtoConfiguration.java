@@ -8,6 +8,7 @@ import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import com.hugo.metalbroker.model.transactions.Transactions;
 import com.hugo.metalbroker.model.user.UserDTO;
+import com.hugo.metalbroker.model.user.WalletDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -29,6 +30,7 @@ public class ProtoConfiguration {
                 .add(SpotItemsList.getDescriptor())
                 .add(Transactions.getDescriptor())
                 .add(UserDTO.getDescriptor())
+                .add(WalletDTO.getDescriptor())
                 .build();
     }
 

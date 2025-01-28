@@ -1,0 +1,19 @@
+syntax = "proto3";
+package user;
+
+option java_multiple_files = true;
+option java_package = "com.hugo.metalbroker.model.user";
+//option java_outer_classname = "WalletDTO";
+
+message WalletDTO {
+    string wallet_id = 1;
+    string user_id = 2;
+
+    enum Status {
+        ACTIVE = 0;
+        INACTIVE = 1;
+        BLOCKED = 2;
+    }
+
+    Status status = 3;
+}
