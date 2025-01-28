@@ -34,6 +34,9 @@ public class SQLQueryConstants {
     public static final String INSERT_INTO_WALLET
             = "INSERT INTO wallet (wallet_id, user_id, status) VALUES (:wallet_id, :user_id, :status)";
 
+    public static final String FIND_COUNT_OF_WALLETS_BY_USERNAME
+            = "SELECT COUNT(*) FROM WALLET WHERE user_id=:username";
+
     public static final String GET_ALL_WALLETS_FROM_USERNAME
             = "SELECT * FROM WALLET WHERE user_id = :user_id";
 }
