@@ -1,10 +1,10 @@
 CREATE DATABASE IF NOT EXISTS onboard;
 
-use onboard;
+USE onboard;
 
 CREATE TABLE IF NOT EXISTS historic_items (
     date DATE NOT NULL,
-    metal VARCHAR(10) NOT NULL,
+    metal VARCHAR(50) NOT NULL,
     weight_unit VARCHAR(50) NOT NULL,
     open DOUBLE NOT NULL,
     close DOUBLE NOT NULL,
@@ -12,11 +12,12 @@ CREATE TABLE IF NOT EXISTS historic_items (
     low DOUBLE NOT NULL,
     ma50 DOUBLE NULL,
     ma200 DOUBLE NULL,
-    PRIMARY KEY (date, metal)
+    PRIMARY KEY (date, metal),
+    INDEX (metal)
 );
 
 CREATE TABLE IF NOT EXISTS spot_items (
-    date DATETIME NOT NULL,
+    date TIMESTAMP NOT NULL,
     metal VARCHAR(64) NOT NULL,
     weight_unit VARCHAR(50) NOT NULL,
     ask DOUBLE NOT NULL,
@@ -24,7 +25,8 @@ CREATE TABLE IF NOT EXISTS spot_items (
     bid DOUBLE NOT NULL,
     value DOUBLE NOT NULL,
     performance DOUBLE NOT NULL,
-    PRIMARY KEY (date, metal)
+    PRIMARY KEY (date, metal),
+    INDEX (metal)
 );
 
 CREATE TABLE IF NOT EXISTS historic_performance (
@@ -36,7 +38,8 @@ CREATE TABLE IF NOT EXISTS historic_performance (
     oney DOUBLE NOT NULL,
     teny DOUBLE NOT NULL,
     ytd DOUBLE NOT NULL,
-    metal VARCHAR(64) NOT NULL
+    metal VARCHAR(64) NOT NULL,
+    INDEX (metal)
 );
 
 CREATE TABLE IF NOT EXISTS user (
@@ -44,7 +47,8 @@ CREATE TABLE IF NOT EXISTS user (
     password VARCHAR(255) NOT NULL,
     firstname VARCHAR(256) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
-    balance INT NOT NULL
+    balance DOUBLE NOT NULL,
+    PRIMARY KEY (username)
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
@@ -54,6 +58,30 @@ CREATE TABLE IF NOT EXISTS transactions (
     price DOUBLE NOT NULL,
     status VARCHAR(256) NOT NULL,
     metal VARCHAR(64) NOT NULL,
-    username VARCHAR(256) NOT NULL,
-    FOREIGN KEY (username) REFERENCES user(username)
+    username VARCHAR(255) NOT NULL,
+    FOREIGN KEY (username) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS currency (
+    currency_code CHAR(3),
+    country_name VARCHAR(256),
+    PRIMARY KEY (currency_code)
+);
+
+CREATE TABLE IF NOT EXISTS wallet (
+    wallet_id VARCHAR(30),
+    user_id VARCHAR(255),
+    PRIMARY KEY (wallet_id, user_id),
+    status ENUM('ACTIVE', 'INACTIVE', 'BLOCKED') DEFAULT 'ACTIVE',
+    currency_code CHAR(3),
+    FOREIGN KEY (user_id) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (currency_code) REFERENCES currency(currency_code)
+);
+
+CREATE TABLE IF NOT EXISTS user_wallet_info (
+    wallet_id VARCHAR(30),
+    metal VARCHAR(64),
+    grams DOUBLE,
+    PRIMARY KEY (wallet_id, metal),
+    FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
