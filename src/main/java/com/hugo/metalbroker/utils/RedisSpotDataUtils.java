@@ -47,7 +47,7 @@ public class RedisSpotDataUtils {
         }
     }
 
-    @Scheduled(fixedRate = 2000)
+    @Scheduled(fixedRate = 150000)
     public void deleteRegularly() {
         Dotenv dotenv = Dotenv.load();
 
@@ -58,7 +58,6 @@ public class RedisSpotDataUtils {
         if (hasData(dotenv.get("REDIS_SPOT_SILVER_KEY"))) {
             redisTemplate.delete(dotenv.get("REDIS_SPOT_SILVER_KEY"));
         }
-
     }
 
     public void deleteValue(String key) {
