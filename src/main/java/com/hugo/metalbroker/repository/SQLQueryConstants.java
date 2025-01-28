@@ -10,7 +10,7 @@ public class SQLQueryConstants {
             = "SELECT COUNT(*) FROM historic_items WHERE date = :date AND metal = :metal";
 
     public static final String GET_ALL_FROM_HISTORIC_DATA_BY_METAL
-            = "SELECT * FROM HISTORIC_ITEMS WHERE metal=:metal";
+            = "SELECT * FROM HISTORIC_ITEMS WHERE metal=:metal ORDER BY date DESC";
 
     // HISTORIC PERFORMANCE
 
@@ -29,7 +29,7 @@ public class SQLQueryConstants {
             = "SELECT COUNT(*) FROM spot_items WHERE date = :date AND metal = :metal";
 
     public static final String GET_ALL_FROM_SPOT_ITEMS_BY_METAL
-            = "SELECT * FROM SPOT_ITEMS WHERE metal=:metal";
+            = "SELECT * FROM SPOT_ITEMS WHERE metal=:metal ORDER BY date DESC";
 
     // USER
 
