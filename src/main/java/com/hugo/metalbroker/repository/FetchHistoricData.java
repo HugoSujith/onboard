@@ -9,7 +9,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
-import com.hugo.metalbroker.exceptions.DataUpdateFailureException;
+import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.utils.ProtoUtils;
@@ -75,7 +75,7 @@ public class FetchHistoricData {
                         return insertIntoDB(metal, historicData, sqlDate) > 0;
                     }
                 } catch (Exception e) {
-                    throw new DataUpdateFailureException(this.getClass().getName());
+                    throw new ApiFetchingFailureException(this.getClass().getName());
                 }
             }
         }

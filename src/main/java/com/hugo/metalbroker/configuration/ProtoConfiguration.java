@@ -6,7 +6,11 @@ import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricPerformance;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
+import com.hugo.metalbroker.model.transactions.TradeAssets;
 import com.hugo.metalbroker.model.transactions.Transactions;
+import com.hugo.metalbroker.model.user.AssetIdDTO;
+import com.hugo.metalbroker.model.user.BalanceDTO;
+import com.hugo.metalbroker.model.user.UpdateAssetDTO;
 import com.hugo.metalbroker.model.user.UserDTO;
 import com.hugo.metalbroker.model.user.WalletDTO;
 import org.springframework.context.annotation.Bean;
@@ -23,12 +27,16 @@ public class ProtoConfiguration {
     private static JsonFormat.TypeRegistry createTypeRegistry() {
         return JsonFormat.TypeRegistry
                 .newBuilder()
+                .add(AssetIdDTO.getDescriptor())
+                .add(BalanceDTO.getDescriptor())
                 .add(HistoricItems.getDescriptor())
                 .add(HistoricItemsList.getDescriptor())
                 .add(HistoricPerformance.getDescriptor())
                 .add(SpotItems.getDescriptor())
                 .add(SpotItemsList.getDescriptor())
+                .add(TradeAssets.getDescriptor())
                 .add(Transactions.getDescriptor())
+                .add(UpdateAssetDTO.getDescriptor())
                 .add(UserDTO.getDescriptor())
                 .add(WalletDTO.getDescriptor())
                 .build();

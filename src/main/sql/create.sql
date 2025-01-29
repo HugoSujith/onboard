@@ -1,3 +1,5 @@
+DROP DATABASE IF EXISTS onboard;
+
 CREATE DATABASE IF NOT EXISTS onboard;
 
 USE onboard;
@@ -53,7 +55,7 @@ CREATE TABLE IF NOT EXISTS user (
 
 CREATE TABLE IF NOT EXISTS transactions (
     id VARCHAR(24) PRIMARY KEY,
-    date_purchased DATETIME NOT NULL,
+    date_purchased TIMESTAMP NOT NULL,
     grams DOUBLE NOT NULL,
     price DOUBLE NOT NULL,
     status VARCHAR(256) NOT NULL,
@@ -72,19 +74,23 @@ CREATE TABLE IF NOT EXISTS currency (
 CREATE TABLE IF NOT EXISTS wallet (
     wallet_id VARCHAR(30),
     user_id VARCHAR(255),
-    PRIMARY KEY (wallet_id, user_id),
+    currency_code CHAR(3),
+    PRIMARY KEY (wallet_id, user_id, currency_code),
     status ENUM('ACTIVE', 'INACTIVE', 'BLOCKED') DEFAULT 'ACTIVE',
     FOREIGN KEY (user_id) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (currency_code) REFERENCES currency(currency_code),
     UNIQUE (user_id),
-    UNIQUE (wallet_id)
+    UNIQUE (wallet_id),
+    UNIQUE (currency_code)
 );
 
 CREATE TABLE IF NOT EXISTS user_wallet_info (
     wallet_id VARCHAR(30),
     metal VARCHAR(64),
-    currency_code CHAR(3),
     grams DOUBLE,
-    PRIMARY KEY (wallet_id, metal, currency_code),
-    FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (currency_code) REFERENCES currency(currency_code)
+    PRIMARY KEY (wallet_id, metal),
+    FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+insert into currency (currency_code, country_name) VALUES ("INR", "INDIA");
+

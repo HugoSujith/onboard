@@ -12,6 +12,6 @@ message Transactions {
   google.protobuf.Timestamp datePurchased = 3;
   double grams = 4;
   double price = 5;
-  double status = 6;
+  string status = 6;
   string metal = 7;
 }

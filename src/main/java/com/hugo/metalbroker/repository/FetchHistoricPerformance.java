@@ -52,7 +52,7 @@ public class FetchHistoricPerformance {
 
         LocalDate today = LocalDate.now();
         Date todayDate = Date.valueOf(today);
-
+        Logger.getLogger(this.getClass().getName()).info(protoUtils.sqlDateToGoogleTimestamp(todayDate).toString());
         if (performanceList.isEmpty() || !performanceList.getLast().getDate().toString().equals(protoUtils.sqlDateToGoogleTimestamp(todayDate).toString())) {
             Logger.getLogger(this.getClass().getName()).info("Inserting new performance data");
 
@@ -67,6 +67,8 @@ public class FetchHistoricPerformance {
             params.put("teny", response.get("10Y").asDouble());
             params.put("ytd", response.get("YTD").asDouble());
             params.put("metal", metal);
+
+            Logger.getLogger(this.getClass().getName()).info(params.toString());
 
             int updateTable = jdbcTemplate.update(insertQuery, params);
         }

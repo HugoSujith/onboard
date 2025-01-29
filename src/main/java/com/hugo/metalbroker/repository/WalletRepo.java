@@ -1,14 +1,11 @@
 package com.hugo.metalbroker.repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.hugo.metalbroker.model.user.WalletDTO;
 import com.hugo.metalbroker.utils.UIDGenerator;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -30,6 +27,7 @@ public class WalletRepo {
             params.put("wallet_id", uidGenerator.generateUID(30));
             params.put("user_id", username);
             params.put("status", "ACTIVE");
+            params.put("currency_code", "INR");
             rowsAffected = jdbcTemplate.update(query, params);
         }
 

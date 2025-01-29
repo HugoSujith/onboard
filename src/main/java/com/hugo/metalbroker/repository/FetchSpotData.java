@@ -10,7 +10,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
-import com.hugo.metalbroker.exceptions.DataUpdateFailureException;
+import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import com.hugo.metalbroker.utils.ProtoUtils;
@@ -74,7 +74,7 @@ public class FetchSpotData {
                         return insertIntoDB(metal, spotData, sqlDate) > 0;
                     }
                 } catch (Exception e) {
-                    throw new DataUpdateFailureException(this.getClass().getName());
+                    throw new ApiFetchingFailureException(this.getClass().getName());
                 }
             }
         }
@@ -143,5 +143,24 @@ public class FetchSpotData {
         params.put("performance", protoUtils.getFieldValue(spotData, "performance"));
         params.put("weightUnit", spotData.getFieldsMap().get("weight_unit").getStringValue());
         return params;
+    }
+
+    public SpotItems fetchCurrentPrices() {
+        String query = SQLQueryConstants.GET_CURRENT_SPOT_PRICES;
+        Map<String, Object> params = new HashMap<>();
+        List<SpotItems> items = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
+                .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
+                .setMetal(rs.getString("metal"))
+                .setWeightUnit(rs.getString("weight_unit"))
+                .setAsk(rs.getDouble("ask"))
+                .setBid(rs.getDouble("bid"))
+                .setMid(rs.getDouble("mid"))
+                .setValue(rs.getDouble("value"))
+                .setPerformance(rs.getDouble("performance"))
+                .build());
+        if (!items.isEmpty()) {
+            return items.getFirst();
+        }
+        return null;
     }
 }

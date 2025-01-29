@@ -1,9 +1,9 @@
 package com.hugo.metalbroker.exceptions;
 
-public class DataUpdateFailureException extends RuntimeException {
+public class ApiFetchingFailureException extends RuntimeException {
     private final String value;
 
-    public DataUpdateFailureException(String value) {
+    public ApiFetchingFailureException(String value) {
         this.value = value;
     }
 

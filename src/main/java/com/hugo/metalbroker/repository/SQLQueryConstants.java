@@ -31,6 +31,9 @@ public class SQLQueryConstants {
     public static final String GET_ALL_FROM_SPOT_ITEMS_BY_METAL
             = "SELECT * FROM SPOT_ITEMS WHERE metal=:metal ORDER BY date DESC";
 
+    public static final String GET_CURRENT_SPOT_PRICES
+            = "SELECT * FROM spot_items ORDER BY date DESC LIMIT 1";
+
     // USER
 
     public static final String INSERT_INTO_USER =
@@ -42,14 +45,46 @@ public class SQLQueryConstants {
     public static final String GET_ALL_USERS_BY_USERNAME
             = "SELECT * FROM USER WHERE USERNAME = :username";
 
+    public static final String GET_USER_BALANCE_BY_USERNAME
+            = "SELECT balance FROM USER WHERE USERNAME = :username";
+
+    public static final String UPDATE_USER_BALANCE_BY_USERNAME
+            = "UPDATE USER SET balance = :balance WHERE username = :username";
+
     // WALLET
 
     public static final String INSERT_INTO_WALLET
-            = "INSERT INTO wallet (wallet_id, user_id, status) VALUES (:wallet_id, :user_id, :status)";
+            = "INSERT INTO wallet (wallet_id, user_id, status, currency_code) VALUES (:wallet_id, :user_id, :status, :currency_code)";
 
     public static final String FIND_COUNT_OF_WALLETS_BY_USERNAME
             = "SELECT COUNT(*) FROM WALLET WHERE user_id=:username";
 
     public static final String GET_ALL_WALLETS_FROM_USERNAME
             = "SELECT * FROM WALLET WHERE user_id = :user_id";
+
+    public static final String GET_WALLET_STATUS
+            = "SELECT STATUS FROM WALLET WHERE wallet_id = :wallet_id";
+
+    public static final String GET_USER_CURRENCY_CODE_BY_USERNAME
+            = "SELECT currency_code FROM wallet WHERE wallet_id = :walletId";
+
+    // USER_WALLET_INFO
+
+    public static final String CREATE_WALLET_INFO_OF_USER
+            = "INSERT INTO user_wallet_info(wallet_id, metal, grams) VALUES (:wallet_id, :metal, :grams)";
+
+    public static final String UPDATE_WALLET_DETAILS_BY_WALLET_ID
+            = "UPDATE user_wallet_info SET grams = :grams WHERE wallet_id = :wallet_id and metal = :metal";
+
+    public static final String GET_ASSET_QUANTITY_BY_WALLET_ID
+            = "SELECT grams FROM user_wallet_info WHERE wallet_id = :wallet_id and metal = :metal";
+
+    public static final String FIND_COUNT_OF_USER_WALLET_INFO_BY_WALLET_ID_AND_METAL
+            = "SELECT COUNT(grams) FROM user_wallet_info WHERE wallet_id = :wallet_id and metal = :metal";
+
+    // TRANSACTIONS
+
+    public static final String INSERT_INTO_TRANSACTION
+            = "INSERT INTO transactions  (id, date_purchased, grams, price, status, metal, username) "
+            + "VALUES (:transaction_id, :date, :grams, :price, :status, :metal, :username)";
 }

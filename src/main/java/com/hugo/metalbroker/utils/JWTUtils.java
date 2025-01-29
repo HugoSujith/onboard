@@ -57,4 +57,26 @@ public class JWTUtils {
         Claims claims = decodeJWTToken(token);
         return claims.getExpiration().after(new Date(System.currentTimeMillis())) && username.equals(claims.getSubject());
     }
+
+    public String getUsername(Cookie[] cookies) {
+        String username = "";
+        for (Cookie cookie : cookies) {
+            if ("JWT_TOKEN".equals(cookie.getName())) {
+                username = this.decodeJWTToken(cookie.getValue()).getSubject();
+                break;
+            }
+        }
+        return username;
+    }
+
+    public String getWalletID(Cookie[] cookies) {
+        String walletId = "";
+        for (Cookie cookie : cookies) {
+            if ("JWT_TOKEN".equals(cookie.getName())) {
+                walletId = (String) this.decodeJWTToken(cookie.getValue()).get("wallet_id");
+                break;
+            }
+        }
+        return walletId;
+    }
 }
