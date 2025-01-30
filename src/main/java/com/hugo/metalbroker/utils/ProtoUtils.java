@@ -28,9 +28,7 @@ public class ProtoUtils {
         return -1000;
     }
 
-    public Timestamp localDateTimeToGoogleTimestamp(LocalDateTime localDateTime) {
-        Instant instant = localDateTime.toInstant(ZoneOffset.UTC);
-
+    public Timestamp localDateTimeToGoogleTimestamp(Instant instant) {
         return Timestamp.newBuilder()
                 .setSeconds(instant.getEpochSecond())
                 .setNanos(instant.getNano())
@@ -43,6 +41,15 @@ public class ProtoUtils {
         return Timestamp.newBuilder()
                 .setSeconds(localDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC))
                 .setNanos(0)
+                .build();
+    }
+
+    public Timestamp dateTimeToGoogleTimestamp(java.sql.Timestamp date) {
+        Instant instant = Instant.parse(date.toString());
+
+        return Timestamp.newBuilder()
+                .setSeconds(instant.getEpochSecond())
+                .setNanos(instant.getNano())
                 .build();
     }
 }

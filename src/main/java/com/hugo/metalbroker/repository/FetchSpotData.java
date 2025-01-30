@@ -1,11 +1,18 @@
 package com.hugo.metalbroker.repository;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -128,9 +135,23 @@ public class FetchSpotData {
         params.put("metal", metal);
 
         List<SpotItems> data = null;
+
+        /**
+         *
+         * LocalDateTime.ofInstant(Instant.toInstant(rs.getString("date")), ZoneId.of("Asia/Kolkata"))
+         *
+         * java.sql.Timestamp timestamp;
+         * Instant instant = timestamp.toInstant();
+         * Timestamp protobufTimestamp = Timestamp.newBuilder()
+         *                                               .setSeconds(instant.getEpochSecond())
+         *                                               .setNanos(instant.getNano())
+         *                                               .build();
+         *
+         */
+
         try {
             data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
-                    .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
+                    .setDate(protoUtils.localDateTimeToGoogleTimestamp(((Timestamp) rs.getObject("date")).toInstant()))
                     .setMetal(rs.getString("metal"))
                     .setWeightUnit(rs.getString("weight_unit"))
                     .setAsk(rs.getDouble("ask"))
@@ -173,7 +194,7 @@ public class FetchSpotData {
         Map<String, Object> params = new HashMap<>();
         params.put("metal", metal);
         List<SpotItems> items = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
-                .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
+                .setDate(protoUtils.localDateTimeToGoogleTimestamp(((Timestamp) rs.getObject("date")).toInstant()))
                 .setMetal(rs.getString("metal"))
                 .setWeightUnit(rs.getString("weight_unit"))
                 .setAsk(rs.getDouble("ask"))

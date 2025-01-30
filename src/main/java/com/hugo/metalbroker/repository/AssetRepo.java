@@ -70,7 +70,6 @@ public class AssetRepo {
                 String query = SQLQueryConstants.CREATE_WALLET_INFO_OF_USER;
                 params.put("grams", (double) 0);
                 namedParameterJdbcTemplate.update(query, params);
-                ;
                 log.info("A new wallet has been created for the user" + Base64.getEncoder().encodeToString(assetDTO.getWalletId().getBytes(StandardCharsets.UTF_8)));
                 return 0;
             }
