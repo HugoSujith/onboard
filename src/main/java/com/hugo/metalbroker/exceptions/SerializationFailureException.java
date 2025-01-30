@@ -9,6 +9,6 @@ public class SerializationFailureException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Serialization failed in " + value + " class!";
+        return "Serialization failed in {" + value + "} class!";
     }
 }

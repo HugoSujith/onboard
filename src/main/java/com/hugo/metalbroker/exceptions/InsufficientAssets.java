@@ -9,6 +9,6 @@ public class InsufficientAssets extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "No sufficient assets. Your account has a current asset of " + value + " gms.";
+        return "No sufficient assets. Your account has a current asset of {" + value + "gms}";
     }
 }

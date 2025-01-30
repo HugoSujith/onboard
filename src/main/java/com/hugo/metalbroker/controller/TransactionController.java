@@ -5,6 +5,7 @@ import com.hugo.metalbroker.model.transactions.Transactions;
 import com.hugo.metalbroker.service.implementation.TransactionServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,17 +21,17 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @PutMapping("/buyAsset")
-    public ResponseEntity<String> buyAsset(HttpServletRequest request, @RequestBody TradeAssets asset) {
+    @PutMapping(value = "/buyAsset", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Transactions> buyAsset(HttpServletRequest request, @RequestBody TradeAssets asset) {
         Transactions response = transactionService.buyAsset(request, asset);
         if (response == null) {
-            return new ResponseEntity<>("Internal server error!", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(response.toString(), HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/sellAsset")
-    public ResponseEntity<String> sellAsset(HttpServletRequest request, TradeAssets asset) {
+    @PutMapping(value = "/sellAsset", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> sellAsset(HttpServletRequest request, @RequestBody TradeAssets asset) {
         Transactions response = transactionService.sellAssets(request, asset);
         if (response == null) {
             return new ResponseEntity<>("Internal server error!", HttpStatus.INTERNAL_SERVER_ERROR);

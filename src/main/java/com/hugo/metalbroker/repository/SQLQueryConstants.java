@@ -32,7 +32,7 @@ public class SQLQueryConstants {
             = "SELECT * FROM SPOT_ITEMS WHERE metal=:metal ORDER BY date DESC";
 
     public static final String GET_CURRENT_SPOT_PRICES
-            = "SELECT * FROM spot_items ORDER BY date DESC LIMIT 1";
+            = "SELECT * FROM spot_items WHERE metal=:metal ORDER BY date DESC LIMIT 1";
 
     // USER
 

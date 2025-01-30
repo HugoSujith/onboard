@@ -8,6 +8,6 @@ public class SessionCreationPolicyFailureException extends RuntimeException {
     }
 
     public String getMessage() {
-        return "Session creation policy failed with following error message: " + value;
+        return "Session creation policy failed with following error message: {" + value + "}";
     }
 }

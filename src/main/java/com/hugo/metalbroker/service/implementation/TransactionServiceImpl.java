@@ -2,7 +2,6 @@ package com.hugo.metalbroker.service.implementation;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.logging.Logger;
 
 import com.hugo.metalbroker.exceptions.InsufficientAssets;
@@ -21,7 +20,6 @@ import com.hugo.metalbroker.utils.JWTUtils;
 import com.hugo.metalbroker.utils.ProtoUtils;
 import com.hugo.metalbroker.utils.UIDGenerator;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.juli.logging.Log;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -90,11 +88,6 @@ public class TransactionServiceImpl implements TransactionService {
                     .build();
             boolean transactionResult = transRepo.createTransaction(transactions);
 
-            Logger.getLogger(this.getClass().getName()).info("Update Quantity: " + Boolean.toString(updateQuantity));
-            Logger.getLogger(this.getClass().getName()).info("Success: " + Boolean.toString(success));
-            Logger.getLogger(this.getClass().getName()).info("Transaction Result: " + Boolean.toString(transactionResult));
-
-
             if (updateQuantity && success && transactionResult) {
                 return transactions;
             }
@@ -119,15 +112,9 @@ public class TransactionServiceImpl implements TransactionService {
             double assetValue = assetUtils.getAssetValue(sellRequest, userCurrencyCode, false);
             BalanceDTO fetchBalance = userService.getBalance(request);
 
-            fetchAssetDTO = AssetIdDTO.newBuilder()
-                    .setMetal(sellRequest.getMetal())
-                    .setWalletId(walletID)
-                    .build();
-            double currentAssetQuantity = assetRepo.getAssetQuantity(fetchAssetDTO);
-
             UpdateAssetDTO assetDTO = UpdateAssetDTO.newBuilder()
                     .setWalletId(walletID)
-                    .setGrams(assetQuantity + currentAssetQuantity)
+                    .setGrams(assetQuantity - sellRequest.getGrams())
                     .setMetal(sellRequest.getMetal())
                     .build();
             boolean quantityUpdate = assetRepo.updateQuantity(assetDTO);

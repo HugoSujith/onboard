@@ -9,6 +9,6 @@ public class RegistrationFailureException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Registration failed for user with username: " + value + "!";
+        return "Registration failed for user with username: {" + value + "}";
     }
 }

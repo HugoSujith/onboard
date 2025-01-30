@@ -9,6 +9,6 @@ public class UserNotFoundException extends RuntimeException {
     
     @Override
     public String getMessage() {
-        return "User with username: " + value + " not found!";
+        return "User with username: {" + value + "} not found!";
     }
 }

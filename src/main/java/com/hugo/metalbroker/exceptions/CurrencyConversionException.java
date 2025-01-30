@@ -9,6 +9,6 @@ public class CurrencyConversionException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return value;
+        return "Failed to convert value from currency: {" + value + "}";
     }
 }

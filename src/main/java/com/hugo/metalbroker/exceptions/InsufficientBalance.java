@@ -9,6 +9,6 @@ public class InsufficientBalance extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "No sufficient balance. Your account has a current balance of " + value + " /- in your local currency";
+        return "No sufficient balance. Your account has a current balance of {" + value + "} /- in your local currency";
     }
 }

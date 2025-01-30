@@ -9,6 +9,6 @@ public class DeserializationFailureException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Deserialization failed in " + value + " class!";
+        return "Deserialization failed in {" + value + "} class!";
     }
 }

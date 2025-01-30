@@ -9,6 +9,6 @@ public class AuthenticationFailureException extends RuntimeException {
     
     @Override
     public String getMessage() {
-        return "Authentication failed for user: " + value + "!";
+        return "Authentication failed for user: {" + value + "}";
     }
 }

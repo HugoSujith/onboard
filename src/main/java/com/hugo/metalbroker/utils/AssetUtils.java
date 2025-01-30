@@ -26,7 +26,7 @@ public class AssetUtils {
             if (jsonResponse != null && jsonResponse.has("conversion_rates") && jsonResponse.get("conversion_rates").has("INR")) {
                 exchangeRate = jsonResponse.get("conversion_rates").get("INR").asDouble();
             }
-            SpotItems currentPrices = fetchSpotData.fetchCurrentPrices();
+            SpotItems currentPrices = fetchSpotData.fetchCurrentPrices(assets.getMetal());
             if (currentPrices != null) {
                 if (buy) {
                     return assets.getGrams() * currentPrices.getAsk() * exchangeRate;

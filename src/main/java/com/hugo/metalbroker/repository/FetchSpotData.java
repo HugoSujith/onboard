@@ -6,18 +6,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
 import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
+import com.hugo.metalbroker.exceptions.DataFetchFailureException;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import com.hugo.metalbroker.utils.ProtoUtils;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Repository
@@ -25,10 +29,12 @@ public class FetchSpotData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private int checker = 0;
     private final ProtoUtils protoUtils;
+    private final Logger log;
 
     public FetchSpotData(NamedParameterJdbcTemplate namedParameterJdbcTemplate, ProtoUtils protoUtils) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.protoUtils = protoUtils;
+        this.log = Logger.getLogger(this.getClass().getName());
     }
 
     @Scheduled(fixedRate = 10000)
@@ -38,18 +44,25 @@ public class FetchSpotData {
         if (checker == 0) {
             spotDataSilver = storeData(Dotenv.load().get("SILVER_SPOT_URL"));
             spotDataGold = storeData(Dotenv.load().get("GOLD_SPOT_URL"));
+            log.info("The whole api data (Spot Items) has been successfully fetched and added to the database.");
         } else {
             spotDataSilver = updateData(Dotenv.load().get("SILVER_SPOT_URL"));
             spotDataGold = updateData(Dotenv.load().get("GOLD_SPOT_URL"));
+            log.info("The new api data (Spot Items) has been successfully fetched, verified and added to the database.");
         }
         checker++;
         return (spotDataSilver && spotDataGold);
     }
 
     public boolean updateData(String url) {
-        RestTemplate restTemplate = new RestTemplate();
-        JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+        JsonNode response = null;
         String metal = url.equals(Dotenv.load().get("SILVER_SPOT_URL")) ? "silver" : "gold";
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            response = restTemplate.getForObject(url, JsonNode.class);
+        } catch (Exception e) {
+            throw new ApiFetchingFailureException(this.getClass().getName());
+        }
 
         if (response != null) {
             ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
@@ -84,10 +97,15 @@ public class FetchSpotData {
 
     public boolean storeData(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_SPOT_URL")) ? "silver" : "gold";
-
-        RestTemplate restTemplate = new RestTemplate();
         int value = -1000;
-        JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+
+        JsonNode response = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            response = restTemplate.getForObject(url, JsonNode.class);
+        } catch (Exception e) {
+            throw new ApiFetchingFailureException(e.getClass().getName());
+        }
         if (response != null) {
             ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
             for (JsonNode spotDataJson : embeddedItems) {
@@ -109,16 +127,21 @@ public class FetchSpotData {
         Map<String, Object> params = new HashMap<>();
         params.put("metal", metal);
 
-        List<SpotItems> data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
-                .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
-                .setMetal(rs.getString("metal"))
-                .setWeightUnit(rs.getString("weight_unit"))
-                .setAsk(rs.getDouble("ask"))
-                .setBid(rs.getDouble("bid"))
-                .setMid(rs.getDouble("mid"))
-                .setValue(rs.getDouble("value"))
-                .setPerformance(rs.getDouble("performance"))
-                .build());
+        List<SpotItems> data = null;
+        try {
+            data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
+                    .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
+                    .setMetal(rs.getString("metal"))
+                    .setWeightUnit(rs.getString("weight_unit"))
+                    .setAsk(rs.getDouble("ask"))
+                    .setBid(rs.getDouble("bid"))
+                    .setMid(rs.getDouble("mid"))
+                    .setValue(rs.getDouble("value"))
+                    .setPerformance(rs.getDouble("performance"))
+                    .build());
+        } catch (DataAccessException e) {
+            throw new DataFetchFailureException(this.getClass().getName());
+        }
         SpotItemsList.Builder spotItemsListBuilder = SpotItemsList.newBuilder();
         spotItemsListBuilder.addAllItems(data);
         return spotItemsListBuilder.build();
@@ -145,9 +168,10 @@ public class FetchSpotData {
         return params;
     }
 
-    public SpotItems fetchCurrentPrices() {
+    public SpotItems fetchCurrentPrices(String metal) {
         String query = SQLQueryConstants.GET_CURRENT_SPOT_PRICES;
         Map<String, Object> params = new HashMap<>();
+        params.put("metal", metal);
         List<SpotItems> items = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> SpotItems.newBuilder()
                 .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
                 .setMetal(rs.getString("metal"))

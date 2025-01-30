@@ -5,11 +5,14 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
 import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
+import com.hugo.metalbroker.exceptions.DataFetchFailureException;
+import com.hugo.metalbroker.exceptions.DataUpdationFailureException;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.utils.ProtoUtils;
@@ -24,22 +27,26 @@ public class FetchHistoricData {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private int checker = 0;
     private final ProtoUtils protoUtils;
+    private final Logger log;
 
     public FetchHistoricData(NamedParameterJdbcTemplate namedParameterJdbcTemplate, ProtoUtils protoUtils) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.protoUtils = protoUtils;
+        log = Logger.getLogger(this.getClass().getName());
     }
 
     @Scheduled(fixedRate = 10000)
-    public boolean data() {
+    public boolean data() throws Exception {
         boolean historicDataSilver = false;
         boolean historicDataGold = false;
         if (checker == 0) {
             historicDataSilver = storeData(Dotenv.load().get("SILVER_HISTORIC_URL"));
             historicDataGold = storeData(Dotenv.load().get("GOLD_HISTORIC_URL"));
+            log.info("The whole api data (Historic Items) has been successfully fetched and added to the database.");
         } else {
             historicDataSilver = updateData(Dotenv.load().get("SILVER_HISTORIC_URL"));
             historicDataGold = updateData(Dotenv.load().get("GOLD_HISTORIC_URL"));
+            log.info("The new api data (Historic Items) has been successfully fetched, verified and updated to the database.");
         }
         checker++;
         return (historicDataSilver && historicDataGold);
@@ -48,8 +55,13 @@ public class FetchHistoricData {
     public boolean updateData(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
 
-        RestTemplate restTemplate = new RestTemplate();
-        JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+        JsonNode response = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            response = restTemplate.getForObject(url, JsonNode.class);
+        } catch (Exception e) {
+            throw new ApiFetchingFailureException(this.getClass().getName());
+        }
 
         if (response != null) {
             ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
@@ -63,19 +75,11 @@ public class FetchHistoricData {
                     LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
                     Date sqlDate = Date.valueOf(date);
 
-                    String checkQuery = SQLQueryConstants.FIND_COUNT_OF_HISTORIC_ITEMS_BY_PK;
-
-                    Map<String, Object> checkParams = new HashMap<>();
-                    checkParams.put("date", sqlDate);
-                    checkParams.put("metal", metal);
-
-                    int count = namedParameterJdbcTemplate.queryForObject(checkQuery, checkParams, Integer.class);
-
-                    if (count == 0) {
+                    if (!checkIfDataPresent(date, metal)) {
                         return insertIntoDB(metal, historicData, sqlDate) > 0;
                     }
                 } catch (Exception e) {
-                    throw new ApiFetchingFailureException(this.getClass().getName());
+                    throw new DataUpdationFailureException(this.getClass().getName());
                 }
             }
         }
@@ -83,26 +87,49 @@ public class FetchHistoricData {
         return false;
     }
 
-    public boolean storeData(String url) {
+    public boolean storeData(String url) throws Exception {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
-        RestTemplate restTemplate = new RestTemplate();
-        JsonNode response = restTemplate.getForObject(url, JsonNode.class);
-        int value = -1000;
+        JsonNode response = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            response = restTemplate.getForObject(url, JsonNode.class);
+        } catch (Exception e) {
+            throw new ApiFetchingFailureException(this.getClass().getName());
+        }
         if (response != null) {
             ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
-            for (JsonNode historicDataJson : embeddedItems) {
-                try {
+            JsonNode historicDataJsonForCheck = embeddedItems.get(0);
+            Struct historicDataForCheck = protoUtils.parseJsonToProto(historicDataJsonForCheck);
+            LocalDate dateForCheck = LocalDate.parse(historicDataForCheck.getFieldsMap().get("date").getStringValue());
+
+            if (!checkIfDataPresent(dateForCheck, metal)) {
+                for (JsonNode historicDataJson : embeddedItems) {
                     Struct historicData = protoUtils.parseJsonToProto(historicDataJson);
                     LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
                     Date sqlDate = Date.valueOf(date);
 
-                    value = insertIntoDB(metal, historicData, sqlDate);
-                } catch (Exception e) {
-                    return false;
+                    int value = insertIntoDB(metal, historicData, sqlDate);
+                    if (value <= 0) {
+                        return false;
+                    }
                 }
+                return true;
             }
         }
-        return (value > 0);
+        return false;
+    }
+
+    public boolean checkIfDataPresent(LocalDate date, String metal) {
+        Date sqlDateForCheck = Date.valueOf(date);
+
+        String checkQuery = SQLQueryConstants.FIND_COUNT_OF_HISTORIC_ITEMS_BY_PK;
+
+        Map<String, Object> checkParams = new HashMap<>();
+        checkParams.put("date", sqlDateForCheck);
+        checkParams.put("metal", metal);
+
+        int count = namedParameterJdbcTemplate.queryForObject(checkQuery, checkParams, Integer.class);
+        return count > 0;
     }
 
     public HistoricItemsList getItems(String metal) {
@@ -110,17 +137,23 @@ public class FetchHistoricData {
         Map<String, Object> params = new HashMap<>();
         params.put("metal", metal);
 
-        List<HistoricItems> data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> HistoricItems.newBuilder()
-                .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
-                .setMetal(rs.getString("metal"))
-                .setWeightUnit(rs.getString("weight_unit"))
-                .setHigh(rs.getDouble("high"))
-                .setLow(rs.getDouble("low"))
-                .setOpen(rs.getDouble("open"))
-                .setClose(rs.getDouble("close"))
-                .setMA50(rs.getDouble("MA50"))
-                .setMA200(rs.getDouble("MA200"))
-                .build());
+        List<HistoricItems> data = null;
+        try {
+            data = namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> HistoricItems.newBuilder()
+                    .setDate(protoUtils.sqlDateToGoogleTimestamp(rs.getDate("date")))
+                    .setMetal(rs.getString("metal"))
+                    .setWeightUnit(rs.getString("weight_unit"))
+                    .setHigh(rs.getDouble("high"))
+                    .setLow(rs.getDouble("low"))
+                    .setOpen(rs.getDouble("open"))
+                    .setClose(rs.getDouble("close"))
+                    .setMA50(rs.getDouble("MA50"))
+                    .setMA200(rs.getDouble("MA200"))
+                    .build());
+        } catch (Exception e) {
+            throw new DataFetchFailureException(Thread.currentThread().getStackTrace()[1].getMethodName());
+        }
+
         HistoricItemsList.Builder historicItemsListBuilder = HistoricItemsList.newBuilder();
         historicItemsListBuilder.addAllItems(data);
         return historicItemsListBuilder.build();
@@ -128,7 +161,6 @@ public class FetchHistoricData {
 
     public int insertIntoDB(String metal, Struct historicData, Date sqlDate) {
         String insertQuery = SQLQueryConstants.INSERT_INTO_HISTORIC_ITEMS;
-
         Map<String, Object> params = buildParamsForData(historicData, sqlDate, metal);
 
         return namedParameterJdbcTemplate.update(insertQuery, params);

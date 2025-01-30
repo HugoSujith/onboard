@@ -9,6 +9,6 @@ public class ApiFetchingFailureException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Data Updation Failure in class: " + value;
+        return "Data Updation Failure in class: {" + value + "}";
     }
 }

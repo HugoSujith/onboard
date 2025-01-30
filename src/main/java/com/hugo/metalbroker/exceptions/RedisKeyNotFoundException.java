@@ -9,6 +9,6 @@ public class RedisKeyNotFoundException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Redis key ( " + value + " ) not found in cache memory!";
+        return "Redis key { " + value + " } not found in cache memory!";
     }
 }
