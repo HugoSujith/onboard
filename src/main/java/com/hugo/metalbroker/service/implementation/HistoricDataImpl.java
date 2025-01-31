@@ -62,12 +62,22 @@ public class HistoricDataImpl implements HistoricData {
         boolean historicDataGold = false;
         if (checker == 0) {
             historicDataSilver = storeData(Dotenv.load().get("SILVER_HISTORIC_URL"));
+            if (historicDataSilver) {
+                log.info("Historic Prices of Silver has been inserted to database");
+            }
             historicDataGold = storeData(Dotenv.load().get("GOLD_HISTORIC_URL"));
-            log.info("The whole api data (Historic Items) has been successfully fetched and added to the database.");
+            if (historicDataGold) {
+                log.info("Historic Prices of Gold has been inserted to database");
+            }
         } else {
             historicDataSilver = updateData(Dotenv.load().get("SILVER_HISTORIC_URL"));
+            if (historicDataSilver) {
+                log.info("Historic Prices of Silver has been updated to database");
+            }
             historicDataGold = updateData(Dotenv.load().get("GOLD_HISTORIC_URL"));
-            log.info("The new api data (Historic Items) has been successfully fetched, verified and updated to the database.");
+            if (historicDataGold) {
+                log.info("Historic Prices of Gold has been updated to database");
+            }
         }
         checker++;
         return (historicDataSilver && historicDataGold);

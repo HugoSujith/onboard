@@ -25,16 +25,20 @@ public class HistoricPerformanceService {
         this.historicPerformance = historicPerformance;
     }
 
-    @Scheduled(fixedRate = 7200000)
+    @Scheduled(fixedRate = 10000)
     public boolean data() {
-        boolean silver = checkData(Dotenv.load().get("SILVER_HISTORIC_URL"));
-        log.info("Historic Performance of Silver has been updated to database");
-        boolean gold = checkData(Dotenv.load().get("GOLD_HISTORIC_URL"));
-        log.info("Historic Performance of Gold has been updated to database");
+        boolean silver = insertHistoricPerformanceDataToDB(Dotenv.load().get("SILVER_HISTORIC_URL"));
+        if (silver) {
+            log.info("Historic Performance of Silver has been updated to database");
+        }
+        boolean gold = insertHistoricPerformanceDataToDB(Dotenv.load().get("GOLD_HISTORIC_URL"));
+        if (gold) {
+            log.info("Historic Performance of Gold has been updated to database");
+        }
         return silver && gold;
     }
 
-    public boolean checkData(String url) {
+    public boolean insertHistoricPerformanceDataToDB(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
         JsonNode response = null;
         try {
@@ -44,10 +48,8 @@ public class HistoricPerformanceService {
             throw new ApiFetchingFailureException(this.getClass().getName());
         }
 
-        LocalDate today = LocalDate.now();
-
         Map<String, Object> params = new HashMap<>();
-        params.put("date", Date.valueOf(today));
+        params.put("date", Date.valueOf(LocalDate.now()));
         params.put("fived", response.get("5D").asDouble());
         params.put("fivey", response.get("5Y").asDouble());
         params.put("max", response.get("MAX").asDouble());
@@ -57,9 +59,9 @@ public class HistoricPerformanceService {
         params.put("ytd", response.get("YTD").asDouble());
         params.put("metal", metal);
 
-        if (historicPerformance.checkDataIfPresent(params)) {
+        if (!historicPerformance.checkDataIfPresent(params)) {
             return historicPerformance.insertIntoDb(params);
         }
-        return true;
+        return false;
     }
 }

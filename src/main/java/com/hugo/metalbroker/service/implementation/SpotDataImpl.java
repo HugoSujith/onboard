@@ -63,12 +63,22 @@ public class SpotDataImpl implements SpotData {
         boolean spotDataGold = false;
         if (checker == 0) {
             spotDataSilver = storeData(Dotenv.load().get("SILVER_SPOT_URL"));
+            if (spotDataSilver) {
+                log.info("Spot Prices of Silver has been inserted to database");
+            }
             spotDataGold = storeData(Dotenv.load().get("GOLD_SPOT_URL"));
-            log.info("The whole api data (Spot Items) has been successfully fetched and added to the database.");
+            if (spotDataGold) {
+                log.info("Spot Prices of Gold has been inserted to database");
+            }
         } else {
             spotDataSilver = updateData(Dotenv.load().get("SILVER_SPOT_URL"));
+            if (spotDataSilver) {
+                log.info("Spot Prices of Silver has been updated to database");
+            }
             spotDataGold = updateData(Dotenv.load().get("GOLD_SPOT_URL"));
-            log.info("The new api data (Spot Items) has been successfully fetched, verified and added to the database.");
+            if (spotDataGold) {
+                log.info("Spot Prices of Gold has been updated to database");
+            }
         }
         checker++;
         return (spotDataSilver && spotDataGold);
