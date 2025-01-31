@@ -31,11 +31,11 @@ public class TransactionController {
     }
 
     @PutMapping(value = "/sellAsset", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> sellAsset(HttpServletRequest request, @RequestBody TradeAssets asset) {
+    public ResponseEntity<Transactions> sellAsset(HttpServletRequest request, @RequestBody TradeAssets asset) {
         Transactions response = transactionService.sellAssets(request, asset);
         if (response == null) {
-            return new ResponseEntity<>("Internal server error!", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(response.toString(), HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
