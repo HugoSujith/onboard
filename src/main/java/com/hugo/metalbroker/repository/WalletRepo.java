@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import com.hugo.metalbroker.exceptions.WalletIdFetchingFailureException;
 import com.hugo.metalbroker.exceptions.WalletIdPresenceFailureException;
-import com.hugo.metalbroker.exceptions.WalletIdVerificationException;
 import com.hugo.metalbroker.model.user.WalletDTO;
 import com.hugo.metalbroker.utils.UIDGenerator;
 import org.springframework.dao.DataAccessException;

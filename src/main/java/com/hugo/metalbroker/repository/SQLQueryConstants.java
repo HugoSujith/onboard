@@ -17,8 +17,8 @@ public class SQLQueryConstants {
     public static final String INSERT_INTO_HISTORIC_PERFORMANCE
             = "INSERT INTO historic_performance (date, fived, fivey, max, onem, oney, teny, ytd, metal) VALUES (:date, :fived, :fivey, :max, :onem, :oney, :teny, :ytd, :metal)";
 
-    public static final String GET_ALL_FROM_HISTORIC_PERFORMANCE
-            = "SELECT * FROM HISTORIC_PERFORMANCE";
+    public static final String FIND_COUNT_OF_HISTORIC_ENTRY_BY_PK
+            = "SELECT COUNT(*) FROM HISTORIC_PERFORMANCE WHERE DATE = :date and METAL = :metal";
 
     // SPOT DATA
 
@@ -30,9 +30,6 @@ public class SQLQueryConstants {
 
     public static final String GET_ALL_FROM_SPOT_ITEMS_BY_METAL
             = "SELECT * FROM SPOT_ITEMS WHERE metal=:metal ORDER BY date DESC";
-
-    public static final String GET_CURRENT_SPOT_PRICES
-            = "SELECT * FROM spot_items WHERE metal=:metal ORDER BY date DESC LIMIT 1";
 
     // USER
 

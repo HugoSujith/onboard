@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS spot_items (
 );
 
 CREATE TABLE IF NOT EXISTS historic_performance (
-    date DATE PRIMARY KEY,
+    date DATE,
     fived DOUBLE NOT NULL,
     fivey DOUBLE NOT NULL,
     max DOUBLE NOT NULL,
@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS historic_performance (
     teny DOUBLE NOT NULL,
     ytd DOUBLE NOT NULL,
     metal VARCHAR(64) NOT NULL,
+    PRIMARY KEY (date, metal),
     INDEX (metal)
 );
 

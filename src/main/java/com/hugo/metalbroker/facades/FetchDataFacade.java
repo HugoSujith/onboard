@@ -3,20 +3,20 @@ package com.hugo.metalbroker.facades;
 import com.hugo.metalbroker.exceptions.MetalNotFoundException;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
-import com.hugo.metalbroker.repository.FetchHistoricData;
-import com.hugo.metalbroker.repository.FetchSpotData;
+import com.hugo.metalbroker.repository.HistoricDataRepo;
+import com.hugo.metalbroker.repository.SpotDataRepo;
 import com.hugo.metalbroker.utils.RedisHistoricDataUtils;
 import com.hugo.metalbroker.utils.RedisSpotDataUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FetchDataFacade {
-    private final FetchHistoricData historicData;
-    private final FetchSpotData spotData;
+    private final HistoricDataRepo historicData;
+    private final SpotDataRepo spotData;
     private final RedisHistoricDataUtils redisHistoricList;
     private final RedisSpotDataUtils redisSpotList;
 
-    public FetchDataFacade(FetchHistoricData historicData, FetchSpotData spotData, RedisHistoricDataUtils redisHistoricList, RedisSpotDataUtils redisSpotList) {
+    public FetchDataFacade(HistoricDataRepo historicData, SpotDataRepo spotData, RedisHistoricDataUtils redisHistoricList, RedisSpotDataUtils redisSpotList) {
         this.historicData = historicData;
         this.spotData = spotData;
         this.redisHistoricList = redisHistoricList;

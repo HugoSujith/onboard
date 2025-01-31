@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import com.hugo.metalbroker.exceptions.TransactionCreationFailureException;
 import com.hugo.metalbroker.model.transactions.Transactions;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 

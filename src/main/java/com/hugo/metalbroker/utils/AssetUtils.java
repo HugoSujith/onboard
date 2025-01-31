@@ -5,15 +5,15 @@ import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
 import com.hugo.metalbroker.exceptions.CurrencyConversionException;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.transactions.TradeAssets;
-import com.hugo.metalbroker.repository.FetchSpotData;
+import com.hugo.metalbroker.repository.SpotDataRepo;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
 public class AssetUtils {
-    private final FetchSpotData fetchSpotData;
+    private final SpotDataRepo fetchSpotData;
 
-    public AssetUtils(FetchSpotData fetchSpotData) {
+    public AssetUtils(SpotDataRepo fetchSpotData) {
         this.fetchSpotData = fetchSpotData;
     }
 
