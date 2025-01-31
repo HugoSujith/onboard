@@ -9,18 +9,17 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
-import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
 import com.hugo.metalbroker.exceptions.DataUpdationFailureException;
 import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import com.hugo.metalbroker.repository.SpotDataRepo;
 import com.hugo.metalbroker.service.SpotData;
+import com.hugo.metalbroker.utils.APIUtil;
 import com.hugo.metalbroker.utils.ProtoUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class SpotDataImpl implements SpotData {
@@ -29,10 +28,12 @@ public class SpotDataImpl implements SpotData {
     private final Logger log;
     private final SpotDataRepo spotDataRepo;
     private final ProtoUtils protoUtils;
+    private final APIUtil apiUtil;
 
-    public SpotDataImpl(FetchDataFacade dataFacade, SpotDataRepo spotDataRepo, ProtoUtils protoUtils) {
+    public SpotDataImpl(FetchDataFacade dataFacade, SpotDataRepo spotDataRepo, ProtoUtils protoUtils, APIUtil apiUtil) {
         this.dataFacade = dataFacade;
         this.protoUtils = protoUtils;
+        this.apiUtil = apiUtil;
         this.log = Logger.getLogger(this.getClass().getName());
         this.spotDataRepo = spotDataRepo;
     }
@@ -87,37 +88,26 @@ public class SpotDataImpl implements SpotData {
     @Override
     public boolean updateData(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_SPOT_URL")) ? "silver" : "gold";
+        ArrayNode embeddedItems = (ArrayNode) apiUtil.getResponse(url);
 
-        JsonNode response = null;
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            response = restTemplate.getForObject(url, JsonNode.class);
-        } catch (Exception e) {
-            throw new ApiFetchingFailureException(this.getClass().getName());
-        }
+        if (embeddedItems != null && !embeddedItems.isEmpty()) {
+            JsonNode spotDataJson = embeddedItems.get(embeddedItems.size() - 1);
 
-        if (response != null) {
-            ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
+            try {
+                Struct spotData = protoUtils.parseJsonToProto(spotDataJson);
+                String date = spotData.getFieldsMap().get("date").getStringValue();
 
-            if (embeddedItems != null && !embeddedItems.isEmpty()) {
-                JsonNode spotDataJson = embeddedItems.get(embeddedItems.size() - 1);
+                OffsetDateTime offsetDateTime = OffsetDateTime.parse(date);
 
-                try {
-                    Struct spotData = protoUtils.parseJsonToProto(spotDataJson);
-                    String date = spotData.getFieldsMap().get("date").getStringValue();
+                Instant instant = offsetDateTime.toInstant();
 
-                    OffsetDateTime offsetDateTime = OffsetDateTime.parse(date);
+                Timestamp timestamp = Timestamp.from(instant);
 
-                    Instant instant = offsetDateTime.toInstant();
-
-                    Timestamp timestamp = Timestamp.from(instant);
-
-                    if (!spotDataRepo.checkIfDataPresent(timestamp, metal)) {
-                        return spotDataRepo.insertIntoDB(metal, spotData, timestamp) > 0;
-                    }
-                } catch (Exception e) {
-                    throw new DataUpdationFailureException(this.getClass().getName());
+                if (!spotDataRepo.checkIfDataPresent(timestamp, metal)) {
+                    return spotDataRepo.insertIntoDB(metal, spotData, timestamp) > 0;
                 }
+            } catch (Exception e) {
+                throw new DataUpdationFailureException(this.getClass().getName());
             }
         }
 
@@ -127,36 +117,28 @@ public class SpotDataImpl implements SpotData {
     @Override
     public boolean storeData(String url) throws Exception {
         String metal = url.equals(Dotenv.load().get("SILVER_SPOT_URL")) ? "silver" : "gold";
-        JsonNode response = null;
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            response = restTemplate.getForObject(url, JsonNode.class);
-        } catch (Exception e) {
-            throw new ApiFetchingFailureException(this.getClass().getName());
-        }
-        if (response != null) {
-            ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
-            JsonNode spotDataJsonForCheck = embeddedItems.get(0);
-            Struct spotDataForCheck = protoUtils.parseJsonToProto(spotDataJsonForCheck);
+        ArrayNode embeddedItems = (ArrayNode) apiUtil.getResponse(url);
 
-            OffsetDateTime offsetDateTime = OffsetDateTime.parse(spotDataForCheck.getFieldsMap().get("date").getStringValue());
-            Timestamp timestamp = Timestamp.from(offsetDateTime.toInstant());
+        JsonNode spotDataJsonForCheck = embeddedItems.get(0);
+        Struct spotDataForCheck = protoUtils.parseJsonToProto(spotDataJsonForCheck);
+
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(spotDataForCheck.getFieldsMap().get("date").getStringValue());
+        Timestamp timestamp = Timestamp.from(offsetDateTime.toInstant());
 
 
-            if (!spotDataRepo.checkIfDataPresent(timestamp, metal)) {
-                for (JsonNode spotDataJson : embeddedItems) {
-                    Struct spotData = protoUtils.parseJsonToProto(spotDataJson);
+        if (!spotDataRepo.checkIfDataPresent(timestamp, metal)) {
+            for (JsonNode spotDataJson : embeddedItems) {
+                Struct spotData = protoUtils.parseJsonToProto(spotDataJson);
 
-                    offsetDateTime = OffsetDateTime.parse(spotData.getFieldsMap().get("date").getStringValue());
-                    timestamp = Timestamp.from(offsetDateTime.toInstant());
+                offsetDateTime = OffsetDateTime.parse(spotData.getFieldsMap().get("date").getStringValue());
+                timestamp = Timestamp.from(offsetDateTime.toInstant());
 
-                    int value = spotDataRepo.insertIntoDB(metal, spotData, timestamp);
-                    if (value <= 0) {
-                        return false;
-                    }
+                int value = spotDataRepo.insertIntoDB(metal, spotData, timestamp);
+                if (value <= 0) {
+                    return false;
                 }
-                return true;
             }
+            return true;
         }
         return false;
     }

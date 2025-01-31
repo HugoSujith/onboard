@@ -25,7 +25,7 @@ public class HistoricPerformanceService {
         this.historicPerformance = historicPerformance;
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 7200000)
     public boolean data() {
         boolean silver = insertHistoricPerformanceDataToDB(Dotenv.load().get("SILVER_HISTORIC_URL"));
         if (silver) {
@@ -62,6 +62,6 @@ public class HistoricPerformanceService {
         if (!historicPerformance.checkDataIfPresent(params)) {
             return historicPerformance.insertIntoDb(params);
         }
-        return false;
+        return true;
     }
 }

@@ -8,18 +8,17 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.protobuf.Struct;
-import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
 import com.hugo.metalbroker.exceptions.DataUpdationFailureException;
 import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.repository.HistoricDataRepo;
 import com.hugo.metalbroker.service.HistoricData;
+import com.hugo.metalbroker.utils.APIUtil;
 import com.hugo.metalbroker.utils.ProtoUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class HistoricDataImpl implements HistoricData {
@@ -28,10 +27,12 @@ public class HistoricDataImpl implements HistoricData {
     private final ProtoUtils protoUtils;
     private final Logger log;
     private final HistoricDataRepo historicDataRepo;
+    private final APIUtil apiUtil;
 
-    public HistoricDataImpl(FetchDataFacade dataFacade, ProtoUtils protoUtils, HistoricDataRepo historicDataRepo) {
+    public HistoricDataImpl(FetchDataFacade dataFacade, ProtoUtils protoUtils, HistoricDataRepo historicDataRepo, APIUtil apiUtil) {
         this.dataFacade = dataFacade;
         this.protoUtils = protoUtils;
+        this.apiUtil = apiUtil;
         this.log = Logger.getLogger(this.getClass().getName());
         this.historicDataRepo = historicDataRepo;
     }
@@ -86,31 +87,20 @@ public class HistoricDataImpl implements HistoricData {
     @Override
     public boolean updateData(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
+        ArrayNode embeddedItems = (ArrayNode) apiUtil.getResponse(url);
 
-        JsonNode response = null;
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            response = restTemplate.getForObject(url, JsonNode.class);
-        } catch (Exception e) {
-            throw new ApiFetchingFailureException(this.getClass().getName());
-        }
+        if (embeddedItems != null && !embeddedItems.isEmpty()) {
+            JsonNode historicDataJson = embeddedItems.get(embeddedItems.size() - 1);
 
-        if (response != null) {
-            ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
-
-            if (embeddedItems != null && !embeddedItems.isEmpty()) {
-                JsonNode historicDataJson = embeddedItems.get(embeddedItems.size() - 1);
-
-                try {
-                    Struct historicData = protoUtils.parseJsonToProto(historicDataJson);
-                    LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
-                    Date sqlDate = Date.valueOf(date);
-                    if (!historicDataRepo.checkIfDataPresent(date, metal)) {
-                        return historicDataRepo.insertIntoDB(metal, historicData, sqlDate) > 0;
-                    }
-                } catch (Exception e) {
-                    throw new DataUpdationFailureException(this.getClass().getName());
+            try {
+                Struct historicData = protoUtils.parseJsonToProto(historicDataJson);
+                LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
+                Date sqlDate = Date.valueOf(date);
+                if (!historicDataRepo.checkIfDataPresent(date, metal)) {
+                    return historicDataRepo.insertIntoDB(metal, historicData, sqlDate) > 0;
                 }
+            } catch (Exception e) {
+                throw new DataUpdationFailureException(this.getClass().getName());
             }
         }
 
@@ -120,33 +110,26 @@ public class HistoricDataImpl implements HistoricData {
     @Override
     public boolean storeData(String url) throws Exception {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
-        JsonNode response = null;
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            response = restTemplate.getForObject(url, JsonNode.class);
-        } catch (Exception e) {
-            throw new ApiFetchingFailureException(this.getClass().getName());
-        }
-        if (response != null) {
-            ArrayNode embeddedItems = (ArrayNode) response.get("_embedded").get("items");
-            JsonNode historicDataJsonForCheck = embeddedItems.get(0);
-            Struct historicDataForCheck = protoUtils.parseJsonToProto(historicDataJsonForCheck);
-            LocalDate dateForCheck = LocalDate.parse(historicDataForCheck.getFieldsMap().get("date").getStringValue());
+        ArrayNode embeddedItems = (ArrayNode) apiUtil.getResponse(url);
 
-            if (!historicDataRepo.checkIfDataPresent(dateForCheck, metal)) {
-                for (JsonNode historicDataJson : embeddedItems) {
-                    Struct historicData = protoUtils.parseJsonToProto(historicDataJson);
-                    LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
-                    Date sqlDate = Date.valueOf(date);
+        JsonNode historicDataJsonForCheck = embeddedItems.get(0);
+        Struct historicDataForCheck = protoUtils.parseJsonToProto(historicDataJsonForCheck);
+        LocalDate dateForCheck = LocalDate.parse(historicDataForCheck.getFieldsMap().get("date").getStringValue());
 
-                    int value = historicDataRepo.insertIntoDB(metal, historicData, sqlDate);
-                    if (value <= 0) {
-                        return false;
-                    }
+        if (!historicDataRepo.checkIfDataPresent(dateForCheck, metal)) {
+            for (JsonNode historicDataJson : embeddedItems) {
+                Struct historicData = protoUtils.parseJsonToProto(historicDataJson);
+                LocalDate date = LocalDate.parse(historicData.getFieldsMap().get("date").getStringValue());
+                Date sqlDate = Date.valueOf(date);
+
+                int value = historicDataRepo.insertIntoDB(metal, historicData, sqlDate);
+                if (value <= 0) {
+                    return false;
                 }
-                return true;
             }
+            return true;
         }
+
         return false;
     }
 }
