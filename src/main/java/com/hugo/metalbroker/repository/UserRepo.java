@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.hugo.metalbroker.exceptions.RegistrationFailureException;
+import com.hugo.metalbroker.exceptions.TokenVersionUpdateFailureException;
 import com.hugo.metalbroker.exceptions.UserBalanceFetchingFailure;
 import com.hugo.metalbroker.exceptions.UserBalanceUpdateFailure;
 import com.hugo.metalbroker.exceptions.UserCurrencyCodeFetchFailureException;
@@ -134,5 +135,28 @@ public class UserRepo {
             }
         }
         throw new UserNotFoundException(walletId);
+    }
+
+    public int getTokenVersion(String username) {
+        if (findIfUserPresent(username)) {
+            String query = SQLQueryConstants.GET_TOKEN_VERSION_BY_USERNAME;
+            Map<String, Object> params = new HashMap<>();
+            params.put("username", username);
+            return namedParameterJdbcTemplate.queryForObject(query, params, Integer.class);
+        }
+        return -1;
+    }
+
+    public boolean updateTokenVersion(String username) {
+        try {
+            String query = SQLQueryConstants.UPDATE_TOKEN_VERSION_BY_USERNAME;
+            Map<String, Object> params = new HashMap<>();
+            params.put("username", username);
+            params.put("token_version", this.getTokenVersion(username) + 1);
+            int count = namedParameterJdbcTemplate.update(query, params);
+            return count > 0;
+        } catch (DataAccessException e) {
+            throw new TokenVersionUpdateFailureException(username);
+        }
     }
 }

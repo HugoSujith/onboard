@@ -13,10 +13,14 @@ import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItems;
 import com.hugo.metalbroker.model.datavalues.historic.HistoricItemsList;
 import com.hugo.metalbroker.repository.HistoricDataRepo;
+import com.hugo.metalbroker.repository.UserRepo;
 import com.hugo.metalbroker.service.HistoricData;
 import com.hugo.metalbroker.utils.APIUtil;
+import com.hugo.metalbroker.utils.JWTUtils;
 import com.hugo.metalbroker.utils.ProtoUtils;
 import io.github.cdimascio.dotenv.Dotenv;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -28,32 +32,41 @@ public class HistoricDataImpl implements HistoricData {
     private final Logger log;
     private final HistoricDataRepo historicDataRepo;
     private final APIUtil apiUtil;
+    private final JWTUtils jwtUtils;
+    private final UserRepo userRepo;
 
-    public HistoricDataImpl(FetchDataFacade dataFacade, ProtoUtils protoUtils, HistoricDataRepo historicDataRepo, APIUtil apiUtil) {
+    public HistoricDataImpl(FetchDataFacade dataFacade, ProtoUtils protoUtils, HistoricDataRepo historicDataRepo, APIUtil apiUtil, JWTUtils jwtUtils,
+                            UserRepo userRepo) {
         this.dataFacade = dataFacade;
         this.protoUtils = protoUtils;
         this.apiUtil = apiUtil;
+        this.jwtUtils = jwtUtils;
+        this.userRepo = userRepo;
         this.log = Logger.getLogger(this.getClass().getName());
         this.historicDataRepo = historicDataRepo;
     }
 
     @Override
-    public HistoricItemsList fetchPaginatedData(String metal, int pageNum) {
-        HistoricItemsList historicData = dataFacade.getHistoricData(metal);
-        List<HistoricItems> itemsList = historicData.getItemsList();
+    public HistoricItemsList fetchPaginatedData(String metal, int pageNum, HttpServletRequest request) {
+        String username = jwtUtils.getUsername(request.getCookies());
+        if (jwtUtils.getTokenVersion(request) == userRepo.getTokenVersion(username)) {
+            HistoricItemsList historicData = dataFacade.getHistoricData(metal);
+            List<HistoricItems> itemsList = historicData.getItemsList();
 
-        int entriesPerPage = Integer.parseInt(Dotenv.load().get("ENTRIES_PER_PAGE"));
+            int entriesPerPage = Integer.parseInt(Dotenv.load().get("ENTRIES_PER_PAGE"));
 
-        int fromIndex = entriesPerPage * (pageNum - 1);
-        int toIndex = Math.min(fromIndex + entriesPerPage, itemsList.size());
+            int fromIndex = entriesPerPage * (pageNum - 1);
+            int toIndex = Math.min(fromIndex + entriesPerPage, itemsList.size());
 
-        if (fromIndex >= itemsList.size() || fromIndex < 0) {
-            return HistoricItemsList.newBuilder().build();
+            if (fromIndex >= itemsList.size() || fromIndex < 0) {
+                return HistoricItemsList.newBuilder().build();
+            }
+
+            List<HistoricItems> paginatedList = itemsList.subList(fromIndex, toIndex);
+
+            return HistoricItemsList.newBuilder().addAllItems(paginatedList).build();
         }
-
-        List<HistoricItems> paginatedList = itemsList.subList(fromIndex, toIndex);
-
-        return HistoricItemsList.newBuilder().addAllItems(paginatedList).build();
+        return HistoricItemsList.newBuilder().build();
     }
 
     @Scheduled(fixedRate = 10000)

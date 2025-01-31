@@ -7,14 +7,9 @@ import com.hugo.metalbroker.exceptions.InsufficientBalance;
 import com.hugo.metalbroker.exceptions.UserNotFoundException;
 import com.hugo.metalbroker.model.user.BalanceDTO;
 import com.hugo.metalbroker.model.user.UserDTO;
-import com.hugo.metalbroker.repository.AssetRepo;
-import com.hugo.metalbroker.repository.TransactionRepo;
 import com.hugo.metalbroker.repository.UserRepo;
 import com.hugo.metalbroker.repository.WalletRepo;
-import com.hugo.metalbroker.utils.AssetUtils;
 import com.hugo.metalbroker.utils.JWTUtils;
-import com.hugo.metalbroker.utils.ProtoUtils;
-import com.hugo.metalbroker.utils.UIDGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,7 +38,7 @@ public class UserServiceImpl implements com.hugo.metalbroker.service.UserService
     public Map.Entry<UserDTO, String> login(UserDTO user, HttpServletResponse response) {
         Authentication auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         if (auth.isAuthenticated()) {
-            String userJWTToken = jwtUtils.generateToken(user.getUsername(), response);
+            String userJWTToken = jwtUtils.generateJWTToken(user.getUsername(), response);
             return new AbstractMap.SimpleEntry<>(user, userJWTToken);
         }
         throw new UserNotFoundException(user.getUsername());
@@ -60,22 +55,31 @@ public class UserServiceImpl implements com.hugo.metalbroker.service.UserService
                 .build();
         boolean registerUser = userRepo.addUsersToDB(userEncrypted);
         boolean createUserWallet = walletRepo.createWallet(user.getUsername());
-        return registerUser && createUserWallet;
+
+        return (registerUser && createUserWallet);
     }
 
     @Override
     public BalanceDTO getBalance(HttpServletRequest request) {
         String username = jwtUtils.getUsername(request.getCookies());
-        double balance = userRepo.getBalance(username);
-        if (balance == -1) {
-            throw new InsufficientBalance(Double.toString(balance));
-        } else {
-            return BalanceDTO.newBuilder()
-                    .setUsername(username)
-                    .setBalance(balance)
-                    .build();
+        if (jwtUtils.getTokenVersion(request) == userRepo.getTokenVersion(username)) {
+            double balance = userRepo.getBalance(username);
+            if (balance == -1) {
+                throw new InsufficientBalance(Double.toString(balance));
+            } else {
+
+                return BalanceDTO.newBuilder()
+                        .setUsername(username)
+                        .setBalance(balance)
+                        .build();
+            }
         }
+        return BalanceDTO.newBuilder().build();
     }
 
-
+    @Override
+    public boolean logout(HttpServletRequest request) {
+        String username = jwtUtils.getUsername(request.getCookies());
+        return userRepo.updateTokenVersion(username);
+    }
 }

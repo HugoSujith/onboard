@@ -36,7 +36,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("JWT_TOKEN".equals(cookie.getName())) {
+                if ("TOKEN".equals(cookie.getName())) {
                     token = cookie.getValue();
                     username = jwtTokenUtils.decodeJWTToken(token).getSubject();
                     break;

@@ -6,9 +6,10 @@ option java_package = "com.hugo.metalbroker.model.user";
 //option java_outer_classname = "User";
 
 message UserDTO {
-  string username = 1;
-  string password = 2;
-  string firstname = 3;
-  string lastname = 4;
-  int32 balance = 5;
+  optional int32 tokenVersion = 1;
+  string username = 2;
+  string password = 3;
+  string firstname = 4;
+  string lastname = 5;
+  int32 balance = 6;
 }

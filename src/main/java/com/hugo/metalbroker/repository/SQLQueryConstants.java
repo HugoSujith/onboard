@@ -48,6 +48,12 @@ public class SQLQueryConstants {
     public static final String UPDATE_USER_BALANCE_BY_USERNAME
             = "UPDATE USER SET balance = :balance WHERE username = :username";
 
+    public static final String UPDATE_TOKEN_VERSION_BY_USERNAME
+            = "UPDATE USER SET token_version = :token_version WHERE username = username";
+
+    public static final String GET_TOKEN_VERSION_BY_USERNAME
+            = "SELECT TOKEN_VERSION FROM USER WHERE USERNAME = :username";
+
     // WALLET
 
     public static final String INSERT_INTO_WALLET

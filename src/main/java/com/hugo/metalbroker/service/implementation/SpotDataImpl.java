@@ -14,10 +14,14 @@ import com.hugo.metalbroker.facades.FetchDataFacade;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItems;
 import com.hugo.metalbroker.model.datavalues.spot.SpotItemsList;
 import com.hugo.metalbroker.repository.SpotDataRepo;
+import com.hugo.metalbroker.repository.UserRepo;
 import com.hugo.metalbroker.service.SpotData;
 import com.hugo.metalbroker.utils.APIUtil;
+import com.hugo.metalbroker.utils.JWTUtils;
 import com.hugo.metalbroker.utils.ProtoUtils;
 import io.github.cdimascio.dotenv.Dotenv;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,32 +33,41 @@ public class SpotDataImpl implements SpotData {
     private final SpotDataRepo spotDataRepo;
     private final ProtoUtils protoUtils;
     private final APIUtil apiUtil;
+    private final JWTUtils jwtUtils;
+    private final UserRepo userRepo;
 
-    public SpotDataImpl(FetchDataFacade dataFacade, SpotDataRepo spotDataRepo, ProtoUtils protoUtils, APIUtil apiUtil) {
+    public SpotDataImpl(FetchDataFacade dataFacade, SpotDataRepo spotDataRepo, ProtoUtils protoUtils, APIUtil apiUtil, JWTUtils jwtUtils,
+                        UserRepo userRepo) {
         this.dataFacade = dataFacade;
         this.protoUtils = protoUtils;
         this.apiUtil = apiUtil;
+        this.jwtUtils = jwtUtils;
+        this.userRepo = userRepo;
         this.log = Logger.getLogger(this.getClass().getName());
         this.spotDataRepo = spotDataRepo;
     }
 
     @Override
-    public SpotItemsList fetchPaginatedData(String metal, int pageNum) {
-        SpotItemsList spotData = dataFacade.getSpotData(metal);
-        List<SpotItems> itemsList = spotData.getItemsList();
+    public SpotItemsList fetchPaginatedData(String metal, int pageNum, HttpServletRequest request) {
+        String username = jwtUtils.getUsername(request.getCookies());
+        if (jwtUtils.getTokenVersion(request) == userRepo.getTokenVersion(username)) {
+            SpotItemsList spotData = dataFacade.getSpotData(metal);
+            List<SpotItems> itemsList = spotData.getItemsList();
 
-        int entriesPerPage = Integer.parseInt(Dotenv.load().get("ENTRIES_PER_PAGE"));
+            int entriesPerPage = Integer.parseInt(Dotenv.load().get("ENTRIES_PER_PAGE"));
 
-        int fromIndex = entriesPerPage * (pageNum - 1);
-        int toIndex = Math.min(fromIndex + entriesPerPage, itemsList.size());
+            int fromIndex = entriesPerPage * (pageNum - 1);
+            int toIndex = Math.min(fromIndex + entriesPerPage, itemsList.size());
 
-        if (fromIndex >= itemsList.size() || fromIndex < 0) {
-            return SpotItemsList.newBuilder().build();
+            if (fromIndex >= itemsList.size() || fromIndex < 0) {
+                return SpotItemsList.newBuilder().build();
+            }
+
+            List<SpotItems> paginatedList = itemsList.subList(fromIndex, toIndex);
+
+            return SpotItemsList.newBuilder().addAllItems(paginatedList).build();
         }
-
-        List<SpotItems> paginatedList = itemsList.subList(fromIndex, toIndex);
-
-        return SpotItemsList.newBuilder().addAllItems(paginatedList).build();
+        return SpotItemsList.newBuilder().build();
     }
 
     @Scheduled(fixedRate = 10000)

@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS user (
     firstname VARCHAR(256) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
     balance DOUBLE NOT NULL,
+    token_version BIGINT DEFAULT 0,
     PRIMARY KEY (username)
 );
 
