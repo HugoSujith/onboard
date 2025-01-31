@@ -10,22 +10,24 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hugo.metalbroker.exceptions.ApiFetchingFailureException;
 import com.hugo.metalbroker.repository.FetchHistoricPerformance;
+import com.hugo.metalbroker.service.HistoricPerformanceService;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class HistoricPerformanceService {
+public class HistoricPerformanceServiceImpl implements HistoricPerformanceService {
     private final Logger log;
     private final FetchHistoricPerformance historicPerformance;
 
-    public HistoricPerformanceService(FetchHistoricPerformance historicPerformance) {
+    public HistoricPerformanceServiceImpl(FetchHistoricPerformance historicPerformance) {
         this.log = Logger.getLogger(this.getClass().getName());
         this.historicPerformance = historicPerformance;
     }
 
     @Scheduled(fixedRate = 7200000)
+    @Override
     public boolean data() {
         boolean silver = insertHistoricPerformanceDataToDB(Dotenv.load().get("SILVER_HISTORIC_URL"));
         if (silver) {
@@ -38,6 +40,7 @@ public class HistoricPerformanceService {
         return silver && gold;
     }
 
+    @Override
     public boolean insertHistoricPerformanceDataToDB(String url) {
         String metal = url.equals(Dotenv.load().get("SILVER_HISTORIC_URL")) ? "silver" : "gold";
         JsonNode response = null;
